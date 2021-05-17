@@ -5,9 +5,10 @@ class bignum
     private:
         unsigned short *digits;
         unsigned short precision; // prec=4 --> XXXX
-		unsigned short efective_size;
+		//unsigned short efective_size;
         bool negative;      
     // ...
+		unsigned short max_precision(const bignum& b1, const bignum& b2);
 
     public:
     // ...
