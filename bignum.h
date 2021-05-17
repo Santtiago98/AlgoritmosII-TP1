@@ -4,8 +4,8 @@ class bignum
 {
     private:
         unsigned short *digits;
-        unsigned short precision; // prec=4 --> XXXX 
-	unsigned short efective_size;
+        unsigned short precision; // prec=4 --> XXXX
+		unsigned short efective_size;
         bool negative;      
     // ...
 
