@@ -11,43 +11,31 @@ using namespace std;
 const bignum operator+(const bignum& b1, const bignum& b2){
 	// A DESARROLLAR JUNTO AL RETURN
 	
+	
+	if( ( b1.negative == true ) & ( b2.negative == true ) ){
+
+		return -((-b1)+(-b2)) ;
+		
+	}
+	
+	if( ( b1.negative == true ) & ( b2.negative == false ) ){
+	
+		return b2 - (-b1);
+		
+	}
+	
+	if( ( b1.negative == false ) & ( b2.negative == true ) ){
+	
+		return b1 - (-b2) ;
+		
+	}
+	
 	unsigned short p = max_precision( b1 , b2 );
-	
-	bignum b3(p);
-	
-	if( b1.negative == true ){
-		if( b2.negative == true ){
-			
-			b3 = (-b1)+(-b2);
-			b3.negative = true;
-			
-		}
-		else{
-			
-			//b3 =  ;
-			
-		}
-		return b3;
-	}
-	
-	if( b2.negative == true ){
-		if( b1.negative == true ){
-			
-			b3 = (-b1)+(-b2);
-			b3.negative = true;
-			
-		}
-		else{
-			
-			//b3 =  ;
-			
-		}
-		return b3;
-	}
-	
 	
 	unsigned short aux=0; //variable auxiliar para guardar cada valor de la iteración
 	unsigned short carry = 0;	//carry de la suma de cada digito
+	
+	bignum b3(p);
 	
 	for( int i=0 ; ( i < b1.precision )  & ( i < b2.precision) ; i++ ){
 		
@@ -151,27 +139,29 @@ const bignum& operator-(const bignum& b1, const bignum& b2){
 const bignum operator-(const bignum& b1, const bignum& b2){
 	// A DESARROLLAR JUNTO AL RETURN
 	
-	unsigned short p = max_precision( b1 , b2 );
-	unsigned short carry = 0;
-	
-	bignum b3(p);
+
 	
 	if( ( b1.negative == true ) & ( b2.negative == false ) ){
 	
-		b3 = -(-b1)+(-b2);
-		b3.negative = true;
-		return b3;
+		return -(-(-b1)+(-b2));
 	}
 	
 	if( ( b1.negative == false ) & ( b2.negative == true ) ){
 	
-		b3 = b1+(-b2);
-		b3.negative = false;
-		return b3;
+		return (b1+(-b2));
 		
 	}
 	
+	if( b2 > b1 ){
+		
+		return -(b2-b1);
+		
+	}
 	
+	unsigned short p = max_precision( b1 , b2 );
+	unsigned short carry = 0;
+	
+	bignum b3(p);
 	
 	for( int i=0 ; ( i < b1.precision )  & ( i < b2.precision) ; i++ ){
 		
@@ -214,14 +204,13 @@ const bignum operator-(const bignum& b1){
 	
 	bignum b2(b1);
 	
-	if( b1.effective_size == 0 ){
+	if( b1 == bignum() ){
 		
-		b2.negative = false;
 		return b2;
 		
 	}
 	
-	b2.negative = !b1.negative;
+	b2.negative = !(b1.negative);
 
 	return b2;
 }
@@ -445,7 +434,7 @@ bool operator<(bignum const &b1, bignum const &b2){
 	
 	else if ( b1.effective_size == b2.effective_size ){
 		
-		for ( int i=b1.effective_size ; i >= 0 ; i++ ){
+		for ( int i=b1.effective_size ; i >= 0 ; i-- ){
 			
 			if( b1.digits[i] > b2.digits[i] ){
 				
@@ -510,7 +499,7 @@ bool operator==(bignum const &b1, bignum const &b2){
 	
 	else if ( b1.effective_size == b2.effective_size ){
 		
-		for ( int i=b1.effective_size ; i >= 0 ; i++ ){
+		for ( int i=b1.effective_size ; i >= 0 ; i-- ){
 			
 			if( b1.digits[i] != b2.digits[i] ){
 				

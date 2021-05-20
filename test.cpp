@@ -2,17 +2,20 @@
 #include <string>
 #include "bignum.h"
 
+//se compila con la siguiente linea:
+//g++ -o test test.cpp bignum.cc -Wall -g
+
 using namespace std;
 
 int main(){
 	
-	std::string s("10000");
-	std::string s2("99");
+	std::string s("-1004353453454448756756867980713123100");
+	std::string s2("943264565475675675675679");
 	
 	bignum b;
 	bignum b1(11);
-	bignum b2(s,5);
-	bignum b2_(s2,30);
+	bignum b2(s,50);
+	bignum b2_(s2,50);
 	//cout << "hola mundo" << endl;
 	
 	cout << b << endl;
@@ -22,6 +25,12 @@ int main(){
 	
 	cout << b2 << "+" << b2_ << "=" << b2 + b2_ << endl;
 	cout << b2 << "-" << b2_ << "=" << b2 - b2_ << endl;
+	
+	cout << -b2 << "+" << b2_ << "=" << -b2 + b2_ << endl;
+	cout << b2_ << "-" << b2 << "=" << b2_ - b2 << endl;
+	
+	cout << b2 << "+" << -b2_ << "=" << b2 + (-b2_) << endl;
+	cout << b2_ << "-" << -b2 << "=" << b2_ - (-b2) << endl;
 	
 	cout << b2 << "<" << b2_ << "=" << (b2 < b2_) << endl;
 	cout << b2 << ">" << b2_ << "=" << (b2 > b2_) << endl;
