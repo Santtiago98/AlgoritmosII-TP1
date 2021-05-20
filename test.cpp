@@ -6,20 +6,26 @@ using namespace std;
 
 int main(){
 	
-	std::string s("1234");
-	std::string s2("32");
+	std::string s("10000");
+	std::string s2("99");
 	
 	bignum b;
 	bignum b1(11);
 	bignum b2(s,5);
-	bignum b2_(s2,2);
+	bignum b2_(s2,30);
 	//cout << "hola mundo" << endl;
 	
 	cout << b << endl;
 	cout << b1 << endl;
 	cout << -b1 << endl;
 	cout << b2 << endl;
-	cout << "suma:" << b2 << "+" << b2_ << "=" << b2 + b2_ << endl;
+	
+	cout << b2 << "+" << b2_ << "=" << b2 + b2_ << endl;
+	cout << b2 << "-" << b2_ << "=" << b2 - b2_ << endl;
+	
+	cout << b2 << "<" << b2_ << "=" << (b2 < b2_) << endl;
+	cout << b2 << ">" << b2_ << "=" << (b2 > b2_) << endl;
+	cout << b2 << "==" << b2_ << "=" << (b2 == b2_) << endl;
 	
 	//cout << bignum("34364678",12) << endl;
 	//cout << -bignum("34364678",12) << endl;

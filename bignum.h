@@ -13,10 +13,14 @@ class bignum{
     private:
         unsigned short *digits;
         unsigned short precision; // prec=4 --> XXXX
-		//unsigned short efective_size;
+		unsigned short effective_size;
         bool negative;
     // ...
-		friend unsigned short max_precision(const bignum& b1, const bignum& b2);
+		friend unsigned short max_precision(const bignum& , const bignum& );
+		friend unsigned short min_precision(const bignum& , const bignum& );
+		friend unsigned short max_size(const bignum& , const bignum& );
+		friend unsigned short min_size(const bignum& , const bignum& );
+		friend unsigned short size( bignum const & );
 
     public:
     // ...
@@ -31,12 +35,15 @@ class bignum{
 
 		friend const bignum operator+(const bignum&, const bignum&);  //p =pmax{p1,p2}
 		friend const bignum operator-(const bignum& b1, const bignum& b2);
-		//friend bignum &operator-(const bignum&, const bignum&);  //p =pmax{p1,p2}
 		friend const bignum operator-(const bignum& b1);
 		//friend bignum &operator*(const bignum&, const bignum&);  //p =pmax{p1,p2}
 		//friend bignum &operator*(const bignum&, const bignum&);  //p =pmax{p1,p2}
 
 		//friend bignum &operator=(const bignum &);
+		
+		friend bool operator<(bignum const &b1, bignum const &b2);
+		friend bool operator>(bignum const &b1, bignum const &b2);
+		friend bool operator==(bignum const &b1, bignum const &b2);
 
 		friend std::ostream& operator<<(std::ostream&, const bignum&);
 		friend std::istream& operator>>(std::istream&, bignum&);
