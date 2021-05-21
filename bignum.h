@@ -5,6 +5,7 @@
 #include <string>
 
 #define PRECISION_DEFAULT 10
+#define PRECISION_INT 10
 
 using namespace std;
 
@@ -25,25 +26,27 @@ class bignum{
     public:
     // ...
 
-		~bignum();   //adentro liberar espacio
+		~bignum();  //adentro liberar espacio
 		bignum(); //prec x defecto - Inicializado en 0
 		bignum(const unsigned short precision);     //util para resultado metodos
-		bignum(const std::string &, const unsigned short precision);   //"12315", p>=size(str+sign)
+		bignum(const std::string &, const unsigned short p );   //"12315", p>=size(str+sign)
 		bignum(const bignum &);  //constr copia
-		bignum(const char* s, const unsigned short p);
-		bignum(std::string& s_, const unsigned short p);
+		bignum(const char* , const unsigned short p);
+		//bignum(int const &);
+		//bignum(int const &, const unsigned short p);
 
-		friend const bignum operator+(const bignum&, const bignum&);  //p =pmax{p1,p2}
-		friend const bignum operator-(const bignum& b1, const bignum& b2);
-		friend const bignum operator-(const bignum& b1);
+		friend const bignum operator+(const bignum&, const bignum&);  // b1 + b2
+		friend const bignum operator-(const bignum& b1, const bignum& b2); // b1 - b2
+		friend const bignum operator-(const bignum& b1); // -b1
 		//friend bignum &operator*(const bignum&, const bignum&);  //p =pmax{p1,p2}
 		//friend bignum &operator*(const bignum&, const bignum&);  //p =pmax{p1,p2}
 
-		//friend bignum &operator=(const bignum &);
+		const bignum & operator=(const bignum &b);
 		
-		friend bool operator<(bignum const &b1, bignum const &b2);
-		friend bool operator>(bignum const &b1, bignum const &b2);
-		friend bool operator==(bignum const &b1, bignum const &b2);
+		// ----- COMPARADORES ------
+		friend bool operator<(bignum const &b1, bignum const &b2); // b1 < b2
+		friend bool operator>(bignum const &b1, bignum const &b2); // b1 > b2
+		friend bool operator==(bignum const &b1, bignum const &b2); // b1 == b2
 
 		friend std::ostream& operator<<(std::ostream&, const bignum&);
 		friend std::istream& operator>>(std::istream&, bignum&);

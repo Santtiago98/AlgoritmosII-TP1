@@ -9,8 +9,8 @@ using namespace std;
 
 int main(){
 	
-	std::string s("-1004353453454448756756867980713123100");
-	std::string s2("943264565475675675675679");
+	std::string s("-100");
+	std::string s2("15");
 	
 	bignum b;
 	bignum b1(11);
@@ -18,10 +18,11 @@ int main(){
 	bignum b2_(s2,50);
 	//cout << "hola mundo" << endl;
 	
-	cout << b << endl;
-	cout << b1 << endl;
-	cout << -b1 << endl;
-	cout << b2 << endl;
+	cout << "b = " << b << endl;
+	cout << "b1 = " << b1 << endl;
+	cout << "-b1 = " <<  -b1 << endl;
+	cout << "b2 = " << b2 << endl;
+	cout << "b2_ = " << b2_ << endl;
 	
 	cout << b2 << "+" << b2_ << "=" << b2 + b2_ << endl;
 	cout << b2 << "-" << b2_ << "=" << b2 - b2_ << endl;
@@ -31,10 +32,30 @@ int main(){
 	
 	cout << b2 << "+" << -b2_ << "=" << b2 + (-b2_) << endl;
 	cout << b2_ << "-" << -b2 << "=" << b2_ - (-b2) << endl;
+	cout << -b2_ << "-" << b2 << "=" << -b2_ - b2 << endl;
+	cout << -b2 << "-" << b2_ << "=" << -b2 - b2_ << endl;
 	
 	cout << b2 << "<" << b2_ << "=" << (b2 < b2_) << endl;
 	cout << b2 << ">" << b2_ << "=" << (b2 > b2_) << endl;
 	cout << b2 << "==" << b2_ << "=" << (b2 == b2_) << endl;
+	cout << b2 << "==" << b2 << "=" << (b2 == b2) << endl;
+	
+	bignum b30;
+	
+	cout << "b2_ = " << b2_ << endl << "b1 = " << b1 << endl ;
+	
+	b30 = b2_ + b1;
+	
+	cout << "hice la suma" << endl;
+	//b30 = b1+b2;
+	cout << "b30 = b2_ + b1" << endl;
+	cout << "b30 = " << b30 << endl;
+	
+	cout << b30 << "+" << b2 << "=" << b30 + b2 << endl;
+	
+	b30 = b30 + b2;
+	
+	cout << "b30 = " << b30 << endl;
 	
 	//cout << bignum("34364678",12) << endl;
 	//cout << -bignum("34364678",12) << endl;

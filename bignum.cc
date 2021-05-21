@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <algorithm>
+#include <math.h> 
 
 #include "bignum.h"
 
@@ -14,17 +15,17 @@ const bignum operator+(const bignum& b1, const bignum& b2){
 	
 	if( ( b1.negative == true ) & ( b2.negative == true ) ){
 
-		return -((-b1)+(-b2)) ;
+		return -((-b1)+(-b2));
 		
 	}
 	
-	if( ( b1.negative == true ) & ( b2.negative == false ) ){
+	else if( ( b1.negative == true ) & ( b2.negative == false ) ){
 	
 		return b2 - (-b1);
 		
 	}
 	
-	if( ( b1.negative == false ) & ( b2.negative == true ) ){
+	else if( ( b1.negative == false ) & ( b2.negative == true ) ){
 	
 		return b1 - (-b2) ;
 		
@@ -143,10 +144,16 @@ const bignum operator-(const bignum& b1, const bignum& b2){
 	
 	if( ( b1.negative == true ) & ( b2.negative == false ) ){
 	
-		return -(-(-b1)+(-b2));
+		return -((-b1)+b2);
 	}
 	
 	if( ( b1.negative == false ) & ( b2.negative == true ) ){
+	
+		return (b1+(-b2));
+		
+	}
+	
+	if( ( b1.negative == true ) & ( b2.negative == true ) ){
 	
 		return (b1+(-b2));
 		
@@ -158,14 +165,16 @@ const bignum operator-(const bignum& b1, const bignum& b2){
 		
 	}
 	
+	//---- CASO BASE ---- //
+	// b1 > b2
 	unsigned short p = max_precision( b1 , b2 );
 	unsigned short carry = 0;
 	
 	bignum b3(p);
 	
-	for( int i=0 ; ( i < b1.precision )  & ( i < b2.precision) ; i++ ){
-		
-		if( b1.digits[i] - carry < b2.digits[i] ){
+	for( int i=0 ; i < b2.effective_size ; i++ ){
+		//effective_size es siempre menor o igual a precision
+		if( (b1.digits[i] - carry) < b2.digits[i] ){
 			
 			b3.digits[i] = 10 + b1.digits[i] - carry - b2.digits[i];
 			carry = 1;
@@ -180,17 +189,17 @@ const bignum operator-(const bignum& b1, const bignum& b2){
 		
 	}
 	
-	for(int i=0  ; i + b2.precision < b3.precision ; i++ ){
+	for(int i=b2.effective_size  ; i < b1.effective_size ; i++ ){
 		
-		if( b1.digits[ i + b2.precision ] - carry < 0 ){
+		if( (b1.digits[i] - carry) < 0 ){
 			
-			b3.digits[i + b2.precision] = 10 + b1.digits[i + b2.precision] - carry;
+			b3.digits[i] = 10 + b1.digits[i] - carry;
 			carry = 1;
 			
 		}
 		else{
 			
-			b3.digits[i + b2.precision] = b1.digits[i + b2.precision] - carry;
+			b3.digits[i] = b1.digits[i] - carry;
 			carry = 0;
 			
 		}
@@ -203,8 +212,10 @@ const bignum operator-(const bignum& b1, const bignum& b2){
 const bignum operator-(const bignum& b1){
 	
 	bignum b2(b1);
+	bignum b_0(1);
 	
-	if( b1 == bignum() ){
+	
+	if( b1 == b_0 ){
 		
 		return b2;
 		
@@ -216,7 +227,7 @@ const bignum operator-(const bignum& b1){
 }
 
 
-const bignum& operator*(const bignum&, const bignum& b){
+const bignum operator*(const bignum&, const bignum& b){
 	// A DESARROLLAR JUNTO AL RETURN
 	return b;
 }
@@ -299,9 +310,44 @@ bignum::bignum(bignum const &b) : precision(b.precision) , effective_size(b.effe
 }
 
 
+// bignum::bignum(int const &n) : precision(PRECISION_INT){
+	
+	// digits = new unsigned short[precision];
+	// int aux = 0;
+	
+	// if( n < 0 ){
+		
+		// negative = true;
+		// aux = -n;
+		
+	// }
+	// else{
+		
+		// negative = false;
+		// aux = n;
+		
+	// }
+	
+	// for( int i=0 ; i < precision ; i++){
+		
+		// digits[i] = aux%10;
+		// aux -= aux%10;
+		// aux /= 10;
+		
+		
+		// if(  ){
+			
+			
+			
+		// }
+
+	// }
+	
+// }
+
 /*
-bignum::bignum(const char* s, const unsigned short p) : precision(p)
-{
+bignum::bignum(const char* s, const unsigned short p) : precision(p){
+	
 	digits = new unsigned short[precision];
 	int i=0;
 	int len_s=0;
@@ -350,7 +396,7 @@ bignum::bignum(const char* s, const unsigned short p) : precision(p)
 */
 
 
-bignum::bignum(std::string& s_, const unsigned short p) : precision(p){
+bignum::bignum(std::string const & s_, const unsigned short p) : precision(p){
 	
 	digits = new unsigned short[precision];
 	
@@ -515,13 +561,31 @@ bool operator==(bignum const &b1, bignum const &b2){
 	
 }
 
+const bignum & bignum::operator=(const bignum &b){
+	
+	delete [] digits;
+	digits = new unsigned short[b.precision];
+	precision = b.precision;
+	negative = b.negative;
+	effective_size = b.effective_size;
+	
+	for(int i=0; i<precision ; i++ ){
+		
+		digits[i] = b.digits[i];
+		
+	}
+	
+	return *this;
+	
+}
+
 unsigned short size( bignum const &b ){	
 
 	for( int i = b.precision - 1 ; i >= 0 ; i-- ){
 		
 		if( b.digits[i] !=0 ){
 			
-			return i;
+			return i+1;
 			
 		}
 		
@@ -529,6 +593,7 @@ unsigned short size( bignum const &b ){
 	
 	return 0;
 }
+
 /*
 
 complejo::complejo(double r) : re_(r), im_(0)
