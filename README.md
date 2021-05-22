@@ -7,4 +7,6 @@ COSAS QUE FALTAN:
 Funciones:
 -operator * (x2)
 -operator =
+
+-operator==
 -operator +
