@@ -4,8 +4,13 @@
 #include <iostream>
 #include <string>
 
+#ifndef PRECISION_DEFAULT
 #define PRECISION_DEFAULT 10
+#endif
+
+#ifndef PRECISION_INT
 #define PRECISION_INT 10
+#endif
 
 using namespace std;
 

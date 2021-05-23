@@ -9,9 +9,11 @@
 
 using namespace std;
 
+#define PRECISION_DEFAULT_ "10"
+
 static void opt_input(string const &);
 static void opt_output(string const &);
-static void opt_factor(string const &);
+static void opt_precision(string const &);
 static void opt_help(string const &);
 
 
@@ -19,21 +21,20 @@ static void opt_help(string const &);
 static option_t options[] = {
 	{1, "i", "input", "-", opt_input, OPT_DEFAULT},
 	{1, "o", "output", "-", opt_output, OPT_DEFAULT},
-	{1, "f", "factor", NULL, opt_factor, OPT_DEFAULT},
+	{1, "p", "precision", PRECISION_DEFAULT_, opt_precision, OPT_DEFAULT},
 	{0, "h", "help", NULL, opt_help, OPT_DEFAULT},
+    {1, "", "", NULL, opt_number, OPT_DEFAULT},
 	{0, },
 };
 
-static int factor;
+static int precision;
 static istream *iss = 0;	// Input Stream (clase para manejo de los flujos de entrada)
 static ostream *oss = 0;	// Output Stream (clase para manejo de los flujos de salida)
 static fstream ifs; 		// Input File Stream (derivada de la clase ifstream que deriva de istream para el manejo de archivos)
 static fstream ofs;		// Output File Stream (derivada de la clase ofstream que deriva de ostream para el manejo de archivos)
 
 
-
 /*****************************************************/
-
 static void
 opt_input(string const &arg)
 {
@@ -88,7 +89,7 @@ opt_output(string const &arg)
 }
 
 static void
-opt_factor(string const &arg)
+opt_precision(string const &arg)
 {
 	istringstream iss(arg);
 
@@ -97,17 +98,24 @@ opt_factor(string const &arg)
 	// números enteros, vamos a verificar que EOF llegue justo
 	// después de la lectura exitosa del escalar.
 
-	if (!(iss >> factor)
-	    || !iss.eof()) {
-		cerr << "non-integer factor: "
+	if (!(iss >> precision) || !iss.eof()) {
+		cerr << "non-integer precision: "
 		     << arg
 		     << "."
 		     << endl;
 		exit(1);
 	}
-
+    
+    if (precision <= 0){
+        cerr << "non-positive precision: "
+            << arg
+            << "."
+            << endl;
+        exit(1);
+    }
+    
 	if (iss.bad()) {
-		cerr << "cannot read integer factor."
+		cerr << "cannot read integer precision."
 		     << endl;
 		exit(1);
 	}
@@ -116,7 +124,7 @@ opt_factor(string const &arg)
 static void
 opt_help(string const &arg)
 {
-	cout << "cmdline -f factor [-i file] [-o file]"
+	cout << "cmdline -p precision [-i file] [-o file] operation"
 	     << endl;
 	exit(0);
 }
@@ -127,7 +135,7 @@ multiply(istream *is, ostream *os)
 	int num;
 
 	while (*is >> num) {
-		*os << num * factor
+		*os << num * precision
 		    << "\n";
 	}
 
@@ -153,7 +161,8 @@ main(int argc, char * const argv[])
 {
 	cmdline cmdl(options);	
 	cmdl.parse(argc, argv); 
-    *oss << "texto de prueba" << endl;
+    //*oss << "precision: " << precision +1 << endl;
+    // at this point the parser should've quit the program if any argument is wrong or missing
     
-	//multiply(iss, oss);	    
+		    
 }
