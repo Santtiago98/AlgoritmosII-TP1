@@ -419,6 +419,10 @@ bignum::bignum(std::string const & s_, const unsigned short p) : precision(p){
 		neg = 1;
 		
 	}
+    else if (s[0] == '+'){
+        negative = false;
+        neg = 1;
+    }
 	else{
 		
 		negative = false;
