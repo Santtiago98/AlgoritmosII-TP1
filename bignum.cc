@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <math.h> 
 
-#include "bignum.h"
+#include "./bignum.h"
 
 using namespace std;
 
@@ -31,39 +31,52 @@ const bignum operator+(const bignum& b1, const bignum& b2){
 		
 	}
 	
+	if( b2>b1 ){
+		
+		return b2+b1;
+		
+	}
+	
+	// --- ASUMO AMBOS POSITIVOS Y B1 > B2 --- //
+	
 	unsigned short p = max_precision( b1 , b2 );
 	
 	unsigned short aux=0; //variable auxiliar para guardar cada valor de la iteración
 	unsigned short carry = 0;	//carry de la suma de cada digito
 	
-	bignum b3(p);
+	bignum b3(std::string("0"),p);
+	b3.effective_size = 0;
 	
-	for( int i=0 ; ( i < b1.precision )  & ( i < b2.precision) ; i++ ){
+	for( int i=0 ; i < b2.effective_size ; i++ ){
 		
 		aux = b1.digits[i] + b2.digits[i] + carry;	//sumo los digitos y el valor de carry
 		b3.digits[i] = aux%10;	//me quedo con el primer digito
 		carry = ( aux - b3.digits[i] ) / 10 ;	//determino el siguiente carry
+		b3.effective_size++;
 		
 	}
 	
-	if( b1.precision < b2.precision ){
+	for(int i=b2.effective_size; i<b1.effective_size ; i++ ){
 		
-		for(int i=0; i+b1.precision<b3.precision ; i++ ){
-			
-			b3.digits[ i+b1.precision ] = b2.digits[i+b1.precision] + carry;
-			carry = 0;
-			
-		}
+		aux = b1.digits[ i ] + carry;
+		b3.digits[i] = aux%10;
+		carry = ( aux - b3.digits[i] ) / 10 ;
+		b3.effective_size++;
+		
 		
 	}
-	else if( b2.precision < b1.precision ){
+	
+	if( (carry > 0) & (b3.effective_size < b3.precision) ){
 		
-		for(int i=0; i+b2.precision<b3.precision ; i++ ){
-			
-			b3.digits[ i+b2.precision ] = b1.digits[i+b2.precision] + carry;
-			carry = 0;
-			
-		}
+		b3.digits[b3.effective_size] = carry;
+		b3.effective_size++;
+		carry = 0;
+		
+	}
+	else if( carry>0 ){
+	
+		delete[] b3.digits;
+		throw std::range_error("precision is not enough");
 		
 	}
 	
@@ -238,32 +251,18 @@ std::ostream& operator<<(std::ostream& os, const bignum& b){
 	//cout << "print bignum:" << endl;
 	//cout << "precision " << b.precision << endl;
 	
-	bool print = false;
-	
 	if ( b.negative ){
 		os << "-";
 	}
 	
 	
-	for( int i = b.precision - 1 ; i >= 0 ; i-- ){
-		if( !print ){
-			
-			if( b.digits[i] !=0 ){
-				
-				os << b.digits[i];
-				print = true;
-				
-			}
-			
-		}
-		else{
-			
-			os << b.digits[i];
-			
-		}
+	for( int i = b.effective_size - 1 ; i >= 0 ; i-- ){
+		
+		os << b.digits[i];
+		
 	}
 	
-	if( !print ){
+	if( b.effective_size == 0 ){
 		
 		os << 0 ;
 		
@@ -289,15 +288,16 @@ bignum::bignum() : effective_size(0) , negative(false) {
 	}
 }
 
-bignum::bignum(unsigned short p) : precision(p) , effective_size(0) , negative(false) {
+// bignum::bignum(unsigned short p) : precision(p) , effective_size(0) , negative(false) {
 	
-	digits = new unsigned short[precision];
+	// cout << "creando por bignum(p) " << endl; 
+	// digits = new unsigned short[precision];
 	
-	for( int i=0 ; i < precision ; i++){
-		digits[i] = 0;
-	}
+	// for( int i=0 ; i < precision ; i++){
+		// digits[i] = 0;
+	// }
 	
-}
+// }
 
 bignum::bignum(bignum const &b) : precision(b.precision) , effective_size(b.effective_size) , negative(b.negative){
 	
@@ -308,42 +308,6 @@ bignum::bignum(bignum const &b) : precision(b.precision) , effective_size(b.effe
 	}
 	
 }
-
-
-// bignum::bignum(int const &n) : precision(PRECISION_INT){
-	
-	// digits = new unsigned short[precision];
-	// int aux = 0;
-	
-	// if( n < 0 ){
-		
-		// negative = true;
-		// aux = -n;
-		
-	// }
-	// else{
-		
-		// negative = false;
-		// aux = n;
-		
-	// }
-	
-	// for( int i=0 ; i < precision ; i++){
-		
-		// digits[i] = aux%10;
-		// aux -= aux%10;
-		// aux /= 10;
-		
-		
-		// if(  ){
-			
-			
-			
-		// }
-
-	// }
-	
-// }
 
 /*
 bignum::bignum(const char* s, const unsigned short p) : precision(p){
@@ -561,9 +525,57 @@ bool operator==(bignum const &b1, bignum const &b2){
 	
 }
 
+bignum::bignum(const int &n) : precision(PRECISION_INT){
+	
+//------	Creación de un bignum a partir de un int -------//
+	
+	digits = new unsigned short[precision]; //se pide memoria para el vector de ushorts que contiene
+	int aux = 0; //variable auxiliar para ir guardando resultado
+	
+	
+	// ---- SETEO DE SIGNO ---- //
+	if( n < 0 ){
+		
+		negative = true;
+		aux = -n;
+		
+	}
+	else{
+		
+		negative = false;
+		aux = n;
+		
+	}
+	
+	// ---- LOOP ---- //
+	for( int i=0 ; i < precision ; i++){
+		
+		if( aux < 10 ){
+			
+			digits[i] = aux%10;
+			effective_size = i+1;
+			break;
+			
+		}
+		else{ 
+
+			digits[i] = aux%10;
+			aux -= aux%10;
+			aux /= 10;
+
+		}
+		
+		
+
+	}
+	
+	//return *this;
+	
+}
+
 const bignum & bignum::operator=(const bignum &b){
 	
-	delete [] digits;
+	delete []digits;
 	digits = new unsigned short[b.precision];
 	precision = b.precision;
 	negative = b.negative;
@@ -573,6 +585,51 @@ const bignum & bignum::operator=(const bignum &b){
 		
 		digits[i] = b.digits[i];
 		
+	}
+	
+	return *this;
+	
+}
+
+const bignum & bignum::operator=(const int &n){
+	
+	precision = PRECISION_INT;
+	delete [] digits;
+	digits = new unsigned short[precision];
+	int aux = 0;
+	
+	if( n < 0 ){
+		
+		negative = true;
+		aux = -n;
+		
+	}
+	else{
+		
+		negative = false;
+		aux = n;
+		
+	}
+	
+	for( int i=0 ; i < precision ; i++){
+		
+		cout << "aux = " << aux << endl; 
+		digits[i] = aux%10;
+		cout << "aux%10 = " << aux%10 << endl;
+		aux -= aux%10;
+		cout << "aux -= aux%10 = " << aux%10 << endl;
+		aux /= 10;
+		cout << "aux /= 10 = " << aux%10 << endl;
+		
+		
+		if( aux < 10 ){
+			
+			digits[i] = aux%10;
+			effective_size = i+1;
+			break;
+			
+		}
+
 	}
 	
 	return *this;
@@ -593,6 +650,38 @@ unsigned short size( bignum const &b ){
 	
 	return 0;
 }
+
+// unsigned short bignum::prec(void) const{	
+
+	// return precision;
+// }
+
+// unsigned short bignum::eff_size(void) const{	
+
+	// return effective_size;
+// }
+
+// bool bignum::sign(void) const{	
+
+	// return !negative;
+// }
+
+// void bignum::prec(void) const{	
+
+	// cout << "prec = " << precision;
+	
+// }
+
+// void bignum::eff_size(void) const{	
+
+	// cout << "eff_size = " << effective_size;
+// }
+
+// void bignum::sign(void) const{	
+
+	// cout << "negative = " << negative;
+	
+// }
 
 /*
 
