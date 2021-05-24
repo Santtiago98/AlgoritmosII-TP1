@@ -7,11 +7,323 @@
 
 using namespace std;
 
+// ------------------ METODOS PRIVADOS USADOS INTERNAMENTE ------------------ //
 
+unsigned short max_precision(const bignum& b1, const bignum& b2){
+	
+	unsigned short p = b1.precision;
+	
+	if ( b2.precision > p ){
+		p = b2.precision;
+	}
+	
+	return p;
+}
+
+unsigned short min_precision(const bignum& b1, const bignum& b2){
+	
+	unsigned short p = b1.precision;
+	
+	if ( b2.precision < p ){
+		p = b2.precision;
+	}
+	
+	return p;
+}
+
+unsigned short max_size(const bignum& b1, const bignum& b2){
+	
+	unsigned short eff = b1.effective_size;
+	
+	if ( b2.effective_size > eff ){
+		eff = b2.effective_size;
+	}
+	
+	return eff;
+}
+
+unsigned short min_size(const bignum& b1, const bignum& b2){
+	
+	unsigned short eff = b1.effective_size;
+	
+	if ( b2.effective_size < eff ){
+		eff = b2.effective_size;
+	}
+	
+	return eff;
+}
+
+unsigned short size( bignum const &b ){	
+	
+	// se empieza a iterar desde el ultimo digito hasta encontrar el primero distinto de 0
+	for( int i = b.precision - 1 ; i >= 0 ; i-- ){
+		
+		if( b.digits[i] !=0 ){
+			
+			return i+1;
+			
+		}
+		
+	}
+	// si se llega hasta acá significa que todos los digitos son 0
+	return 0;
+}
+
+// ------------------ METODOS PARA DEVOLVER ATRIBUTOS ------------------ //
+
+ unsigned short bignum::prec(void) const{	
+
+	 return precision;
+ }
+
+ unsigned short bignum::eff_size(void) const{	
+
+	 return effective_size;
+ }
+
+ bool bignum::sign() const  {	
+
+	 return !negative;
+ }
+
+bool bignum::is_negative() const {
+	return negative;
+}
+
+// ------------------ DESTRUCTOR ------------------ //
+
+bignum::~bignum(){
+	
+	delete []digits;
+	
+}
+
+// ------------------ CONSTRUCTORES ------------------ //
+
+bignum::bignum() : effective_size(0) , negative(false) {
+	
+	//bignum(PRECISION_DEFAULT);
+	precision = BIGNUM_PRECISION_DEFAULT;
+	digits = new unsigned short[precision];
+	//se setean en 0 todos los digitos
+	for(int i=0 ; i < precision ; i++){
+		
+		digits[i] = 0;
+		
+	}
+	
+}
+
+ bignum::bignum(unsigned short p) : precision(p) , effective_size(0) , negative(false) {
+
+	digits = new unsigned short[precision];
+	//se setean en 0 todos los digitos
+	for( int i=0 ; i < precision ; i++){
+		
+		digits[i] = 0;
+		
+	}
+	
+}
+
+bignum::bignum(const int n, const unsigned short p=BIGNUM_PRECISION_INT){
+	
+//------	Creación de un bignum a partir de un int -------//
+	
+	precision = p;
+	digits = new unsigned short[precision]; //se pide memoria para el vector de ushorts que contiene
+	int aux = 0; //variable auxiliar para ir guardando resultado
+	
+	//cout << "POR INT" <<endl;
+	// ---- SETEO DE SIGNO ---- //
+	// me quedo solo con la parte absoluta de n
+	if( n < 0 ){
+		
+		negative = true;
+		aux = -n;
+		
+	}
+	else{
+		
+		negative = false;
+		aux = n;
+		
+	}
+	
+	// ---- LOOP ---- //
+	for( int i=0 ; i < precision ; i++){
+		
+		if( aux == 0 ){
+			
+			for(int j = effective_size; j < precision ; j++ ){
+				
+				digits[j] = 0;
+				
+			}
+			break;
+			
+		}
+		else if( aux < 10 ){
+			
+			digits[i] = aux%10;
+			effective_size = i+1;
+			break;
+			
+		}
+		else{ 
+
+			digits[i] = aux%10;
+			aux -= aux%10;
+			aux /= 10;
+
+		}
+		
+		
+
+	}
+	
+	if ( (aux < 10) == false ){
+		
+		delete[] digits;
+		throw std::range_error(BIGNUM_MSG_ERR_PRECISION);
+		
+	}
+	
+}
+
+bignum::bignum(std::string const & s_, const unsigned short p) : precision(p){
+	
+	digits = new unsigned short[precision];
+	
+	int neg = 0;
+	std::string s(s_);
+	
+	if( s[0] == '-' ){
+		
+		negative = true;
+		neg = 1;
+		
+	}
+	else if( s[0] == '+' ){
+		
+		negative = false;
+		neg = 1;
+		
+	}
+	else{
+		
+		negative = false;
+		neg = 0;
+		
+	}
+	
+	std::reverse(s.begin() + neg , s.end() );
+	
+	if( int( s.length() ) > precision + neg ){
+		throw std::range_error(BIGNUM_MSG_ERR_PRECISION);
+	}
+	
+	for(long unsigned int i=0  ; ( i <  s.length()  - neg )  & ( i < precision ) ; i++ ){
+		
+		// 48 representa '0', 57 representa '9'
+		
+		if( ( s[ i+neg ] < '0' ) | ( s[ i+neg ] > '9' )  ){
+			
+			digits[i] = 0;
+			throw std::invalid_argument(BIGNUM_MSG_ERR_INVALID_CHARS);
+		
+		}
+		else{
+			
+			digits[i] = s[ i+neg ]-48; //restandole 48 queda el digito que necesito como ushort
+			
+		}
+	}
+	
+	for(long unsigned int i=0  ; i + s.length() - neg < precision ; i++ ){
+		
+		digits[ i + s.length() - neg ] = 0;
+		
+	}
+	
+	effective_size = size(*this);
+
+}
+
+bignum::bignum(const char * c_arr, const unsigned short p) : precision(p){
+	
+	std::string s(c_arr);
+	digits = NULL;
+	*this = bignum(s,p);
+
+}
+
+bignum::bignum(bignum const &b) : precision(b.precision) , effective_size(b.effective_size) , negative(b.negative){
+	
+	// CONSTRUCTOR COPIA //
+	
+	digits = new unsigned short[precision];
+	
+	for( int i=0 ; i < precision ; i++){
+		digits[i] = b.digits[i];
+	}
+	
+}
+
+bignum const bignum::operator+=(const bignum&b2){
+	
+	*this = *this + b2;
+	
+	return *this;
+	
+}
+
+bignum const bignum::operator-=(const bignum&b2){
+	
+	*this = *this - b2;
+	
+	return *this;
+	
+}
+
+bignum const bignum::operator*=(const bignum&b2){
+	
+	*this = *this * b2;
+	
+	return *this;
+	
+}
+
+bignum const bignum::operator+=(const int n){
+	
+	bignum b2(n, precision);
+	*this = *this + b2;
+	
+	return *this;
+	
+}
+
+bignum const bignum::operator-=(const int n){
+	
+	bignum b2(n, precision);
+	*this = *this - b2;
+	
+	return *this;
+	
+}
+
+bignum const bignum::operator*=(const int n){
+	
+	bignum b2(n, precision);
+	*this = *this * b2;
+	
+	return *this;
+	
+}
+
+// ------------------ OPERACIONES ALGEBRAICAS ------------------ //
 
 const bignum operator+(const bignum& b1, const bignum& b2){
-	// A DESARROLLAR JUNTO AL RETURN
-	
 	
 	if( ( b1.negative == true ) & ( b2.negative == true ) ){
 
@@ -86,66 +398,7 @@ const bignum operator+(const bignum& b1, const bignum& b2){
 	
 }
 
-
-unsigned short max_precision(const bignum& b1, const bignum& b2){
-	
-	unsigned short p = b1.precision;
-	
-	if ( b2.precision > p ){
-		p = b2.precision;
-	}
-	
-	return p;
-}
-
-unsigned short min_precision(const bignum& b1, const bignum& b2){
-	
-	unsigned short p = b1.precision;
-	
-	if ( b2.precision < p ){
-		p = b2.precision;
-	}
-	
-	return p;
-}
-
-unsigned short max_size(const bignum& b1, const bignum& b2){
-	
-	unsigned short eff = b1.effective_size;
-	
-	if ( b2.effective_size > eff ){
-		eff = b2.effective_size;
-	}
-	
-	return eff;
-}
-
-unsigned short min_size(const bignum& b1, const bignum& b2){
-	
-	unsigned short eff = b1.effective_size;
-	
-	if ( b2.effective_size < eff ){
-		eff = b2.effective_size;
-	}
-	
-	return eff;
-}
-
-
-/*
-const bignum& operator-(const bignum& b1, const bignum& b2){
-	
-	
-	// A DESARROLLAR JUNTO AL RETURN
-	return b1;
-}
-
-*/
-
 const bignum operator-(const bignum& b1, const bignum& b2){
-	// A DESARROLLAR JUNTO AL RETURN
-	
-
 	
 	if( ( b1.negative == true ) & ( b2.negative == false ) ){
 	
@@ -210,15 +463,16 @@ const bignum operator-(const bignum& b1, const bignum& b2){
 		}
 		
 	}
+	
 	b3.effective_size = size(b3);
 	return b3;
+	
 }
 
 const bignum operator-(const bignum& b1){
 	
 	bignum b2(b1);
-	bignum b_0(1);
-	
+	bignum b_0("0",1);
 	
 	if( b1 == b_0 ){
 		
@@ -285,182 +539,80 @@ const bignum operator*(const bignum& b1, const bignum& b2){
 		return b3;
 	}
 
-	throw std::range_error("precision is not enough");
+	throw std::range_error(BIGNUM_MSG_ERR_PRECISION);
 }
 
+// ------------------ ASIGNACIONES ------------------ //
 
-
-
-std::ostream& operator<<(std::ostream& os, const bignum& b){
-	// A DESARROLLAR JUNTO AL RETURN
+const bignum & bignum::operator=(const bignum &b){
 	
-	//cout << "print bignum:" << endl;
-	//cout << "precision " << b.precision << endl;
-	
-	if ( b.negative ){
-		os << "-";
-	}
-	
-	
-	for( int i = b.effective_size - 1 ; i >= 0 ; i-- ){
+	if( digits != NULL ){
 		
-		os << b.digits[i];
+		delete []digits;
 		
 	}
 	
-	if( b.effective_size == 0 ){
+	digits = new unsigned short[b.precision];
+	precision = b.precision;
+	negative = b.negative;
+	effective_size = b.effective_size;
+	
+	for(int i=0; i<precision ; i++ ){
 		
-		os << 0 ;
+		digits[i] = b.digits[i];
 		
 	}
 	
-	return os;
+	return *this;
+	
 }
 
-std::istream& operator>>(std::istream& is, bignum& b){
-	// A DESARROLLAR JUNTO AL RETURN
-	return is;
-}
-
-bignum::bignum() : effective_size(0) , negative(false) {
+const bignum & bignum::operator=(const int &n){
 	
-	//bignum(PRECISION_DEFAULT);
-	precision = PRECISION_DEFAULT;
-	
+	precision = BIGNUM_PRECISION_INT;
+	delete [] digits;
 	digits = new unsigned short[precision];
+	int aux = 0;
 	
-	for(int i=0 ; i < precision ; i++){
-		digits[i] = 0;
+	if( n < 0 ){
+		
+		negative = true;
+		aux = -n;
+		
 	}
-}
-
- bignum::bignum(unsigned short p) : precision(p) , effective_size(0) , negative(false) {
-	
-	 //cout << "creando por bignum(p) " << endl; 
-	 digits = new unsigned short[precision];
-	
-	 for( int i=0 ; i < precision ; i++){
-		 digits[i] = 0;
-	 }
-	
- }
-
-bignum::bignum(bignum const &b) : precision(b.precision) , effective_size(b.effective_size) , negative(b.negative){
-	
-	digits = new unsigned short[precision];
+	else{
+		
+		negative = false;
+		aux = n;
+		
+	}
 	
 	for( int i=0 ; i < precision ; i++){
-		digits[i] = b.digits[i];
+		
+		cout << "aux = " << aux << endl; 
+		digits[i] = aux%10;
+		cout << "aux%10 = " << aux%10 << endl;
+		aux -= aux%10;
+		cout << "aux -= aux%10 = " << aux%10 << endl;
+		aux /= 10;
+		cout << "aux /= 10 = " << aux%10 << endl;
+		
+		
+		if( aux < 10 ){
+			
+			digits[i] = aux%10;
+			effective_size = i+1;
+			break;
+			
+		}
+
 	}
+	
+	return *this;
 	
 }
 
-/*
-bignum::bignum(const char* s, const unsigned short p) : precision(p){
-	
-	digits = new unsigned short[precision];
-	int i=0;
-	int len_s=0;
-	
-	for( i=0 ; s[i] != '\0' ; i++ ){
-		
-	}
-	
-	len_s = i;
-	
-	if( s[0] == '-' ){
-		
-		negative = true;
-		i = 1;
-		
-	}
-	else{
-		
-		negative = false;
-		i = 0;
-		
-	}
-	
-	if( (negative & len_s > precision+1) | ( !negative & len_s > precision ) ){
-		//i=i/0;
-	}
-	
-	std::reverse( s+i , s + len_s );
-	
-	for( i=0  ; i < len_s ; i++ ){
-		
-		if( s[i] < 48 | s[i] > 57 ){
-			
-			digits[i] = 0;
-			//i=i/0;
-			
-		}
-		else{
-			
-			digits[i] = s[i]-48;
-			
-		}
-	}
-
-}
-*/
-
-
-bignum::bignum(std::string const & s_, const unsigned short p) : precision(p){
-	
-	digits = new unsigned short[precision];
-	
-	int neg = 0;
-	std::string s(s_);
-	
-	if( s[0] == '-' ){
-		
-		negative = true;
-		neg = 1;
-		
-	}
-	else{
-		
-		negative = false;
-		neg = 0;
-		
-	}
-	
-	std::reverse(s.begin() + neg , s.end() );
-	
-	if( int( s.length() ) > precision + neg ){
-		throw std::range_error("precision is not enough");
-	}
-	
-	for(long unsigned int i=0  ; ( i <  s.length()  - neg )  & ( i < precision ) ; i++ ){
-		
-		if( ( s[ i+neg ] < 48 ) | ( s[ i+neg ] > 57 )  ){
-			
-			digits[i] = 0;
-			throw std::invalid_argument("The input numbers should be integers");
-			
-		}
-		else{
-			
-			digits[i] = s[ i+neg ]-48;
-			
-		}
-	}
-	
-	for(long unsigned int i=0  ; i + s.length() - neg < precision ; i++ ){
-		
-		digits[ i + s.length() - neg ] = 0;
-		
-	}
-	
-	effective_size = size(*this);
-
-}
-
-bignum::~bignum(){
-	
-	delete []digits;
-}
+// ------------------ COMPARADORES ------------------ //
 
 bool operator<(bignum const &b1, bignum const &b2){
 	
@@ -571,151 +723,79 @@ bool operator==(bignum const &b1, bignum const &b2){
 	
 }
 
-bignum::bignum(const int &n) : precision(PRECISION_INT){
+bool operator>=(bignum const &b1, bignum const &b2){
 	
-//------	Creación de un bignum a partir de un int -------//
-	
-	digits = new unsigned short[precision]; //se pide memoria para el vector de ushorts que contiene
-	int aux = 0; //variable auxiliar para ir guardando resultado
-	
-	//cout << "POR INT" <<endl;
-	// ---- SETEO DE SIGNO ---- //
-	if( n < 0 ){
+	if( (b1 == b2) | (b1>b2) ){
 		
-		negative = true;
-		aux = -n;
+		return true;
 		
 	}
+	
 	else{
 		
-		negative = false;
-		aux = n;
+		return false;
 		
 	}
-	
-	// ---- LOOP ---- //
-	for( int i=0 ; i < precision ; i++){
-		
-		if( aux < 10 ){
-			
-			digits[i] = aux%10;
-			effective_size = i+1;
-			break;
-			
-		}
-		else{ 
-
-			digits[i] = aux%10;
-			aux -= aux%10;
-			aux /= 10;
-
-		}
-		
-		
-
-	}
-	
-	//return *this;
 	
 }
 
-const bignum & bignum::operator=(const bignum &b){
+bool operator<=(bignum const &b1, bignum const &b2){
 	
-	delete []digits;
-	digits = new unsigned short[b.precision];
-	precision = b.precision;
-	negative = b.negative;
-	effective_size = b.effective_size;
-	
-	for(int i=0; i<precision ; i++ ){
+	if( (b1 == b2) | (b1<b2) ){
 		
-		digits[i] = b.digits[i];
+		return true;
 		
 	}
 	
-	return *this;
-	
-}
-
-const bignum & bignum::operator=(const int &n){
-	
-	precision = PRECISION_INT;
-	delete [] digits;
-	digits = new unsigned short[precision];
-	int aux = 0;
-	
-	if( n < 0 ){
-		
-		negative = true;
-		aux = -n;
-		
-	}
 	else{
 		
-		negative = false;
-		aux = n;
+		return false;
 		
 	}
 	
-	for( int i=0 ; i < precision ; i++){
-		
-		cout << "aux = " << aux << endl; 
-		digits[i] = aux%10;
-		cout << "aux%10 = " << aux%10 << endl;
-		aux -= aux%10;
-		cout << "aux -= aux%10 = " << aux%10 << endl;
-		aux /= 10;
-		cout << "aux /= 10 = " << aux%10 << endl;
-		
-		
-		if( aux < 10 ){
-			
-			digits[i] = aux%10;
-			effective_size = i+1;
-			break;
-			
-		}
-
-	}
-	
-	return *this;
-	
-}
-
-unsigned short size( bignum const &b ){	
-
-	for( int i = b.precision - 1 ; i >= 0 ; i-- ){
-		
-		if( b.digits[i] !=0 ){
-			
-			return i+1;
-			
-		}
-		
-	}
-	
-	return 0;
-}
-
-
- unsigned short bignum::prec(void) const{	
-
-	 return precision;
- }
-
- unsigned short bignum::eff_size(void) const{	
-
-	 return effective_size;
- }
-
- bool bignum::sign() const  {	
-
-	 return !negative;
- }
-
-bool bignum::is_negative() const {
-	return negative;
 }
 
 
 
+// ------------------ LECTURA/ESCRITURA ------------------ //
+
+std::ostream& operator<<(std::ostream& os, const bignum& b){
+	// A DESARROLLAR JUNTO AL RETURN
+	
+	//cout << "print bignum:" << endl;
+	//cout << "precision " << b.precision << endl;
+	
+	if ( b.negative ){
+		os << "-";
+	}
+	
+	
+	for( int i = b.effective_size - 1 ; i >= 0 ; i-- ){
+		
+		os << b.digits[i];
+		
+	}
+	
+	if( b.effective_size == 0 ){
+		
+		os << 0 ;
+		
+	}
+	
+	return os;
+}
+
+std::istream& operator>>(std::istream& is, bignum& b){
+	// A DESARROLLAR JUNTO AL RETURN
+	
+	string s;
+	
+	is >> s ;
+	
+	bignum b1(s,b.precision);
+	
+	b = b1;
+	
+	return is;
+	
+}

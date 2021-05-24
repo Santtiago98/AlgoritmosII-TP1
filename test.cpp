@@ -19,8 +19,33 @@ int main(){
 	string s1("222");
 	string s2("-933");
 
-	bignum b1(s1, 3);
-	bignum b2(s2, 3);
+	bignum b1(s1, 30);
+	bignum b2(s2, 30);
+	bignum c("-1256",5);
+	
+	cout << "c = " << c << endl;
+	cout << "b1 = " << b1 << "; b2 = " << b2 << endl;
+	b1 += b2;
+	
+	cout << "b1 += b2: " << b1 << endl;
+	
+	cout << "b1 = " << b1 << "; b2 = " << b2 << endl;
+	b1 -= b2;
+	cout << "b1 -= b2: " << b1 << endl;
+	
+	cout << "b1 = " << b1 << "; b2 = " << b2 << endl;
+	b1 *= b2;
+	cout << "b1 *= b2: " << b1 << endl;
+	
+	cout << "b1 = " << b1 << "; b2 = " << 11 << endl;
+	b1 += 11;
+	cout << "b1 += 11: " << b1 << endl;
+	
+	cout << "b1 = " << b1 << "; b2 = " << 10 << endl;
+	b1 *= 10;
+	cout << "b1 *= 10: " << b1 << endl;
+
+
 	//bignum b2(s,4);
 	//bignum b2_(s2,4);
 	//cout << "hola mundo" << endl;
@@ -32,7 +57,8 @@ int main(){
 	cout << b1 << "x" << b2 << "=" << b1*b2  << endl;
 	
 
-
+	cin >> b1 ;
+	cout << b1 << endl;
 
 	// cout << "b = " << b << endl;
 	// cout << "b1 = " << b1 << endl;
