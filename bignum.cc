@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <math.h> 
 
-#include "bignum.h"
+#include "./bignum.h"
 
 using namespace std;
 
@@ -289,15 +289,16 @@ bignum::bignum() : effective_size(0) , negative(false) {
 	}
 }
 
-bignum::bignum(unsigned short p) : precision(p) , effective_size(0) , negative(false) {
+// bignum::bignum(unsigned short p) : precision(p) , effective_size(0) , negative(false) {
 	
-	digits = new unsigned short[precision];
+	// cout << "creando por bignum(p) " << endl; 
+	// digits = new unsigned short[precision];
 	
-	for( int i=0 ; i < precision ; i++){
-		digits[i] = 0;
-	}
+	// for( int i=0 ; i < precision ; i++){
+		// digits[i] = 0;
+	// }
 	
-}
+// }
 
 bignum::bignum(bignum const &b) : precision(b.precision) , effective_size(b.effective_size) , negative(b.negative){
 	
@@ -308,42 +309,6 @@ bignum::bignum(bignum const &b) : precision(b.precision) , effective_size(b.effe
 	}
 	
 }
-
-
-// bignum::bignum(int const &n) : precision(PRECISION_INT){
-	
-	// digits = new unsigned short[precision];
-	// int aux = 0;
-	
-	// if( n < 0 ){
-		
-		// negative = true;
-		// aux = -n;
-		
-	// }
-	// else{
-		
-		// negative = false;
-		// aux = n;
-		
-	// }
-	
-	// for( int i=0 ; i < precision ; i++){
-		
-		// digits[i] = aux%10;
-		// aux -= aux%10;
-		// aux /= 10;
-		
-		
-		// if(  ){
-			
-			
-			
-		// }
-
-	// }
-	
-// }
 
 /*
 bignum::bignum(const char* s, const unsigned short p) : precision(p){
@@ -561,9 +526,53 @@ bool operator==(bignum const &b1, bignum const &b2){
 	
 }
 
+bignum::bignum(const int &n) : precision(PRECISION_INT){
+	
+	//delete [] digits;
+	digits = new unsigned short[precision];
+	int aux = 0;
+	
+	if( n < 0 ){
+		
+		negative = true;
+		aux = -n;
+		
+	}
+	else{
+		
+		negative = false;
+		aux = n;
+		
+	}
+	
+	for( int i=0 ; i < precision ; i++){
+		
+		if( aux < 10 ){
+			
+			digits[i] = aux%10;
+			effective_size = i+1;
+			break;
+			
+		}
+		else{ 
+
+			digits[i] = aux%10;
+			aux -= aux%10;
+			aux /= 10;
+
+		}
+		
+		
+
+	}
+	
+	//return *this;
+	
+}
+
 const bignum & bignum::operator=(const bignum &b){
 	
-	delete [] digits;
+	delete []digits;
 	digits = new unsigned short[b.precision];
 	precision = b.precision;
 	negative = b.negative;
@@ -573,6 +582,51 @@ const bignum & bignum::operator=(const bignum &b){
 		
 		digits[i] = b.digits[i];
 		
+	}
+	
+	return *this;
+	
+}
+
+const bignum & bignum::operator=(const int &n){
+	
+	precision = PRECISION_INT;
+	delete [] digits;
+	digits = new unsigned short[precision];
+	int aux = 0;
+	
+	if( n < 0 ){
+		
+		negative = true;
+		aux = -n;
+		
+	}
+	else{
+		
+		negative = false;
+		aux = n;
+		
+	}
+	
+	for( int i=0 ; i < precision ; i++){
+		
+		cout << "aux = " << aux << endl; 
+		digits[i] = aux%10;
+		cout << "aux%10 = " << aux%10 << endl;
+		aux -= aux%10;
+		cout << "aux -= aux%10 = " << aux%10 << endl;
+		aux /= 10;
+		cout << "aux /= 10 = " << aux%10 << endl;
+		
+		
+		if( aux < 10 ){
+			
+			digits[i] = aux%10;
+			effective_size = i+1;
+			break;
+			
+		}
+
 	}
 	
 	return *this;
@@ -593,6 +647,38 @@ unsigned short size( bignum const &b ){
 	
 	return 0;
 }
+
+// unsigned short bignum::prec(void) const{	
+
+	// return precision;
+// }
+
+// unsigned short bignum::eff_size(void) const{	
+
+	// return effective_size;
+// }
+
+// bool bignum::sign(void) const{	
+
+	// return !negative;
+// }
+
+// void bignum::prec(void) const{	
+
+	// cout << "prec = " << precision;
+	
+// }
+
+// void bignum::eff_size(void) const{	
+
+	// cout << "eff_size = " << effective_size;
+// }
+
+// void bignum::sign(void) const{	
+
+	// cout << "negative = " << negative;
+	
+// }
 
 /*
 

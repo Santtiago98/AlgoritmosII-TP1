@@ -9,53 +9,61 @@ using namespace std;
 
 int main(){
 	
-	std::string s("-100");
-	std::string s2("15");
+	// std::string s("-100");
+	// std::string s2("15");
 	
-	bignum b;
-	bignum b1(11);
-	bignum b2(s,50);
-	bignum b2_(s2,50);
-	//cout << "hola mundo" << endl;
+	// bignum b;
+	// bignum b1(11);
+	// bignum b2(s,50);
+	// bignum b2_(s2,50);
+	cout << "hola mundo" << endl;
 	
-	cout << "b = " << b << endl;
-	cout << "b1 = " << b1 << endl;
-	cout << "-b1 = " <<  -b1 << endl;
-	cout << "b2 = " << b2 << endl;
-	cout << "b2_ = " << b2_ << endl;
+	// cout << "b = " << b << endl;
+	// cout << "b1 = " << b1 << endl;
+	// cout << "-b1 = " <<  -b1 << endl;
+	// cout << "b2 = " << b2 << endl;
+	// cout << "b2_ = " << b2_ << endl;
 	
-	cout << b2 << "+" << b2_ << "=" << b2 + b2_ << endl;
-	cout << b2 << "-" << b2_ << "=" << b2 - b2_ << endl;
+	// cout << b2 << "+" << b2_ << "=" << b2 + b2_ << endl;
+	// cout << b2 << "-" << b2_ << "=" << b2 - b2_ << endl;
 	
-	cout << -b2 << "+" << b2_ << "=" << -b2 + b2_ << endl;
-	cout << b2_ << "-" << b2 << "=" << b2_ - b2 << endl;
+	// cout << -b2 << "+" << b2_ << "=" << -b2 + b2_ << endl;
+	// cout << b2_ << "-" << b2 << "=" << b2_ - b2 << endl;
 	
-	cout << b2 << "+" << -b2_ << "=" << b2 + (-b2_) << endl;
-	cout << b2_ << "-" << -b2 << "=" << b2_ - (-b2) << endl;
-	cout << -b2_ << "-" << b2 << "=" << -b2_ - b2 << endl;
-	cout << -b2 << "-" << b2_ << "=" << -b2 - b2_ << endl;
+	// cout << b2 << "+" << -b2_ << "=" << b2 + (-b2_) << endl;
+	// cout << b2_ << "-" << -b2 << "=" << b2_ - (-b2) << endl;
+	// cout << -b2_ << "-" << b2 << "=" << -b2_ - b2 << endl;
+	// cout << -b2 << "-" << b2_ << "=" << -b2 - b2_ << endl;
 	
-	cout << b2 << "<" << b2_ << "=" << (b2 < b2_) << endl;
-	cout << b2 << ">" << b2_ << "=" << (b2 > b2_) << endl;
-	cout << b2 << "==" << b2_ << "=" << (b2 == b2_) << endl;
-	cout << b2 << "==" << b2 << "=" << (b2 == b2) << endl;
+	// cout << b2 << "<" << b2_ << "=" << (b2 < b2_) << endl;
+	// cout << b2 << ">" << b2_ << "=" << (b2 > b2_) << endl;
+	// cout << b2 << "==" << b2_ << "=" << (b2 == b2_) << endl;
+	// cout << b2 << "==" << b2 << "=" << (b2 == b2) << endl;
 	
-	bignum b30;
+	// bignum b30;
 	
-	cout << "b2_ = " << b2_ << endl << "b1 = " << b1 << endl ;
+	// cout << "b2_ = " << b2_ << endl << "b1 = " << b1 << endl ;
 	
-	b30 = b2_ + b1;
+	// b30 = b2_ + b1;
 	
-	cout << "hice la suma" << endl;
+	// cout << "hice la suma" << endl;
 	//b30 = b1+b2;
-	cout << "b30 = b2_ + b1" << endl;
-	cout << "b30 = " << b30 << endl;
+	// cout << "b30 = b2_ + b1" << endl;
+	// cout << "b30 = " << b30 << endl;
 	
-	cout << b30 << "+" << b2 << "=" << b30 + b2 << endl;
+	// cout << b30 << "+" << b2 << "=" << b30 + b2 << endl;
 	
-	b30 = b30 + b2;
+	// b30 = b30 + b2;
 	
-	cout << "b30 = " << b30 << endl;
+	// cout << "b30 = " << b30 << endl;
+	
+	bignum b_int = 120;
+	bignum b_int2 = -12234;
+	
+	cout << "b_int = " << b_int << endl;
+	cout << "b_int2 = " << b_int2 << endl;
+	// cout << "b_int precision = " << b_int.prec() << endl;
+	// cout << "b_int effective size = " << b_int.eff_size() << endl;
 	
 	//cout << bignum("34364678",12) << endl;
 	//cout << -bignum("34364678",12) << endl;
