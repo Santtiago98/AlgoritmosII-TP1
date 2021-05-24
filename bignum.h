@@ -30,21 +30,18 @@ class bignum{
 		friend unsigned short max_size(const bignum& , const bignum& );
 		friend unsigned short min_size(const bignum& , const bignum& );
 		friend unsigned short size( bignum const & );
-		// friend unsigned short prec_(void) const;
-		// friend unsigned short effsize(void) const;
-		// friend bool sign(void) const;
+
     public:
     // ...
 		//METODOS PARA DEVOLVER ATRIBUTOS
-		// friend unsigned short prec_(void) const;
-		// friend unsigned short effsize(void) const;
-		// friend bool is_negative(void) const;
-
-
+		unsigned short prec(void) const;
+		unsigned short eff_size(void) const;
+		bool is_negative() const;
+		bool sign() const ;
 		
 		~bignum();  //adentro liberar espacio
 		bignum(); //prec x defecto - Inicializado en 0
-		//bignum(const unsigned short precision);     //util para resultado metodos
+		bignum(const unsigned short precision);     //util para resultado metodos
 		bignum(const int &n);     //util para resultado metodos
 		bignum(const std::string &, const unsigned short p );   //"12315", p>=size(str+sign)
 		bignum(const bignum &);  //constr copia
@@ -57,7 +54,7 @@ class bignum{
 		friend const bignum operator+(const bignum&, const bignum&);  // b1 + b2
 		friend const bignum operator-(const bignum& b1, const bignum& b2); // b1 - b2
 		friend const bignum operator-(const bignum& b1); // -b1
-		//friend bignum &operator*(const bignum&, const bignum&);  //p =pmax{p1,p2}
+		friend const bignum operator*(const bignum&, const bignum&);  //p =pmax{p1,p2}
 		//friend bignum &operator*(const bignum&, const bignum&);  //p =pmax{p1,p2}
 
 		const bignum & operator=(const bignum &b);

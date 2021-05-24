@@ -168,10 +168,11 @@ const bignum calculate_expression(const string & str){
     string operations_symbols = "+-*";
     size_t delimPos;
     bignum result(precision);
-    
 
+    
     if((delimPos = str.find_first_of(operations_symbols))!= string::npos ){
     	
+    	//Chequeo si hay un '-' al principio
     	if(delimPos == 0){
 	    	if((delimPos = str.substr(1, str.length()).find_first_of(operations_symbols)) != string::npos ){
 	    	   	delimPos += 1;
@@ -201,7 +202,7 @@ const bignum calculate_expression(const string & str){
 				result = op1 - op2;
 				break;
 			case '*':
-				//res = op1 * op2;
+				result = op1 * op2;
 				break;
 			default:
 				cerr << "Invalid Operation" <<endl;

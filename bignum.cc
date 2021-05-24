@@ -131,14 +131,6 @@ unsigned short min_size(const bignum& b1, const bignum& b2){
 	return eff;
 }
 
-/*
-complejo const
-operator+(complejo const &x, complejo const &y)
-{
-	complejo z(x.re_ + y.re_, x.im_ + y.im_);
-	return z;
-}
-*/
 
 /*
 const bignum& operator-(const bignum& b1, const bignum& b2){
@@ -218,7 +210,7 @@ const bignum operator-(const bignum& b1, const bignum& b2){
 		}
 		
 	}
-
+	b3.effective_size = size(b3);
 	return b3;
 }
 
@@ -240,10 +232,64 @@ const bignum operator-(const bignum& b1){
 }
 
 
-const bignum operator*(const bignum&, const bignum& b){
-	// A DESARROLLAR JUNTO AL RETURN
-	return b;
+
+/*  Pseudo Cose Multiply with array
+multiply(a[1..p], b[1..q], base)                            // Operands containing rightmost digits at index 1
+  product = [1..p+q]                                        // Allocate space for result
+  for b_i = 1 to q                                          // for all digits in b
+    carry = 0
+    for a_i = 1 to p                                        // for all digits in a
+      product[a_i + b_i - 1] += carry + a[a_i] * b[b_i]
+      carry = product[a_i + b_i - 1] / base
+      product[a_i + b_i - 1] = product[a_i + b_i - 1] mod base
+    product[b_i + p] = carry                               // last digit comes from final carry
+  return product
+*/
+
+const bignum operator*(const bignum& b1, const bignum& b2){
+
+	unsigned short p = max_precision( b1 , b2 );
+	unsigned short carry ;	//carry del producto de cada digito
+	int base = 10;
+
+	
+	// El producto b1[1..p] y b2[1..q] tiene largo p+q[-1] dependiendo del carry final
+	if((b1.effective_size + b2.effective_size)  <= p + 1){
+		bignum b3(p);
+		
+		for(int i = 0; i<b2.effective_size;i++){
+			carry=0;
+			for(int j = 0 ; j < b1.effective_size ; j++){
+				b3.digits[i+j] += carry + b1.digits[j] * b2.digits[i];	
+				carry = b3.digits[i+j] / base;
+				b3.digits[i+j] = b3.digits[i+j] % base;
+			}
+
+			if(! ((i+b1.effective_size == p )  && (carry != 0))) {
+				b3.digits[i + b1.effective_size ] = carry;
+			}
+			
+			//Si calculo el producto y la precision no me alcanza para agregar el ultimo carry --> error				
+			else{
+				delete[] b3.digits;
+				throw std::range_error("precision is not enough");
+			}
+			
+		}
+		
+		//Seteo effective_size y signo del resultado
+		b3.effective_size = size(b3);
+		if((b1.negative && !b2.negative) || (!b1.negative && b2.negative)  )
+			b3.negative = true;
+
+		return b3;
+	}
+
+	throw std::range_error("precision is not enough");
 }
+
+
+
 
 std::ostream& operator<<(std::ostream& os, const bignum& b){
 	// A DESARROLLAR JUNTO AL RETURN
@@ -288,16 +334,16 @@ bignum::bignum() : effective_size(0) , negative(false) {
 	}
 }
 
-// bignum::bignum(unsigned short p) : precision(p) , effective_size(0) , negative(false) {
+ bignum::bignum(unsigned short p) : precision(p) , effective_size(0) , negative(false) {
 	
-	// cout << "creando por bignum(p) " << endl; 
-	// digits = new unsigned short[precision];
+	 //cout << "creando por bignum(p) " << endl; 
+	 digits = new unsigned short[precision];
 	
-	// for( int i=0 ; i < precision ; i++){
-		// digits[i] = 0;
-	// }
+	 for( int i=0 ; i < precision ; i++){
+		 digits[i] = 0;
+	 }
 	
-// }
+ }
 
 bignum::bignum(bignum const &b) : precision(b.precision) , effective_size(b.effective_size) , negative(b.negative){
 	
@@ -383,7 +429,7 @@ bignum::bignum(std::string const & s_, const unsigned short p) : precision(p){
 	std::reverse(s.begin() + neg , s.end() );
 	
 	if( int( s.length() ) > precision + neg ){
-		//salir por falla
+		throw std::range_error("precision is not enough");
 	}
 	
 	for(long unsigned int i=0  ; ( i <  s.length()  - neg )  & ( i < precision ) ; i++ ){
@@ -391,7 +437,7 @@ bignum::bignum(std::string const & s_, const unsigned short p) : precision(p){
 		if( ( s[ i+neg ] < 48 ) | ( s[ i+neg ] > 57 )  ){
 			
 			digits[i] = 0;
-			//salir por falla
+			throw std::invalid_argument("The input numbers should be integers");
 			
 		}
 		else{
@@ -532,7 +578,7 @@ bignum::bignum(const int &n) : precision(PRECISION_INT){
 	digits = new unsigned short[precision]; //se pide memoria para el vector de ushorts que contiene
 	int aux = 0; //variable auxiliar para ir guardando resultado
 	
-	
+	//cout << "POR INT" <<endl;
 	// ---- SETEO DE SIGNO ---- //
 	if( n < 0 ){
 		
@@ -651,51 +697,25 @@ unsigned short size( bignum const &b ){
 	return 0;
 }
 
-// unsigned short bignum::prec(void) const{	
 
-	// return precision;
-// }
+ unsigned short bignum::prec(void) const{	
 
-// unsigned short bignum::eff_size(void) const{	
+	 return precision;
+ }
 
-	// return effective_size;
-// }
+ unsigned short bignum::eff_size(void) const{	
 
-// bool bignum::sign(void) const{	
+	 return effective_size;
+ }
 
-	// return !negative;
-// }
+ bool bignum::sign() const  {	
 
-// void bignum::prec(void) const{	
+	 return !negative;
+ }
 
-	// cout << "prec = " << precision;
-	
-// }
-
-// void bignum::eff_size(void) const{	
-
-	// cout << "eff_size = " << effective_size;
-// }
-
-// void bignum::sign(void) const{	
-
-	// cout << "negative = " << negative;
-	
-// }
-
-/*
-
-complejo::complejo(double r) : re_(r), im_(0)
-{
-}
-
-complejo::complejo(double r, double i) : re_(r), im_(i)
-{
-}
-
-complejo::complejo(complejo const &c) : re_(c.re_), im_(c.im_)
-{
+bool bignum::is_negative() const {
+	return negative;
 }
 
 
-*/
+
