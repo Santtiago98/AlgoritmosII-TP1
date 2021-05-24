@@ -166,38 +166,50 @@ std::string& trim(std::string& str, const std::string& chars = "\t\n\v\f\r ")
 const bignum calculate_expression(const string & str){
 
     string operations_symbols = "+-*";
-    size_t delimPos;
+    size_t delimPos, aux;
     bignum result(precision);
 
     
     if((delimPos = str.find_first_of(operations_symbols))!= string::npos ){
     	
-    	//Chequeo si hay un '-' al principio
+    	// Chequeo si hay un '+/-' al principio
     	if(delimPos == 0){
-	    	if((delimPos = str.substr(1, str.length()).find_first_of(operations_symbols)) != string::npos ){
-	    	   	delimPos += 1;
-	    	}
-	    	else{
-	    		cerr << "Invalid Expression" <<endl;
+	    	if((delimPos = str.find_first_of(operations_symbols,1)) == string::npos ){
+                // no se encontró otro operador 
+	    		cerr << "Invalid expression." <<endl;
 				exit(1);
 	    	}
 		}
  
-		//Spliteo la expresion para obtener operandos
+		// Spliteo la expresion para obtener operandos
 		string s1 = str.substr(0, delimPos);
 		string s2 = str.substr(delimPos+1, str.length());
-
-		//Creo bignum desde string eliminando los espacios
-		bignum op1(trim(s1),precision);
-		bignum op2(trim(s2),precision);
+        // Elimino los espacioes
+        s1 = trim(s1);
+        s2 = trim(s2);
+        
+        if (s2.length() == 0){
+            cout << "Missing operand." << endl;
+            exit(1);
+        }
+        else if(((aux = s2.find_last_of(operations_symbols)) > 0 ) or (aux == s2.length()-1) ){
+            // se encontró otro operador luego del primer caracter inicial
+            cout << "Invalid operand." << endl;
+            exit(1);
+            
+            
+        }
+        
+		// Creo bignum desde string eliminando los espacios
+		bignum op1(s1,precision);
+		bignum op2(s2,precision);
 		
 
-		//Hago operacion detectada en el string
+		// Hago operacion detectada en el string
 		switch(str[delimPos]){
 			case '+':
 				result = op1 + op2;
 				break;
-
 			case '-':
 				result = op1 - op2;
 				break;
@@ -205,7 +217,7 @@ const bignum calculate_expression(const string & str){
 				result = op1 * op2;
 				break;
 			default:
-				cerr << "Invalid Operation" <<endl;
+				cerr << "Invalid operation." <<endl;
 				exit(1);
 		}
 
