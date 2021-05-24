@@ -580,6 +580,10 @@ const bignum & bignum::operator=(const int &n){
 		aux = -n;
 		
 	}
+    else if (s[0] == '+'){
+        negative = false;
+        neg = 1;
+    }
 	else{
 		
 		negative = false;

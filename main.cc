@@ -166,7 +166,8 @@ std::string& trim(std::string& str, const std::string& chars = "\t\n\v\f\r ")
 const bignum calculate_expression(const string & str){
 
     string operations_symbols = "+-*";
-    size_t delimPos, aux;
+    size_t delimPos;
+    size_t aux=0;
     bignum result(precision);
 
     
@@ -188,15 +189,18 @@ const bignum calculate_expression(const string & str){
         s1 = trim(s1);
         s2 = trim(s2);
         
-        if (s2.length() == 0){
+        if (s1.length() == 0 || s2.length() == 0){
             cout << "Missing operand." << endl;
             exit(1);
         }
-        else if(((aux = s2.find_last_of(operations_symbols)) > 0 ) or (aux == s2.length()-1) ){
+        else if(((aux = s2.find_first_of(operations_symbols,1)) != string::npos)){
             // se encontró otro operador luego del primer caracter inicial
             cout << "Invalid operand." << endl;
             exit(1);
-            
+        }
+        else if ((aux = s2.find_first_of(operations_symbols)) == s2.length()-1){
+            cout << "Invalid operand." << endl;
+            exit(1);           
             
         }
         
