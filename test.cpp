@@ -9,17 +9,30 @@ using namespace std;
 
 int main(){
 	
-	std::string s("9999");
-	std::string s2("25");
-	
-	bignum b;
-	bignum b1 = 124;
-	bignum b2(s,4);
-	bignum b2_(s2,4);
+	//std::string s("9999");
+	//std::string s2("25");
+
+
+	int a = -13;
+	int b = 24;
+
+	string s1("222");
+	string s2("-933");
+
+	bignum b1(s1, 3);
+	bignum b2(s2, 3);
+	//bignum b2(s,4);
+	//bignum b2_(s2,4);
 	//cout << "hola mundo" << endl;
+
+
+
 	
-	cout << b1 << endl;
-	cout << b2_ << "+" << b2 << "=" << b2 + b2_ << endl;
+	cout << a << "x" << b << "=" << a*b << endl;
+	cout << b1 << "x" << b2 << "=" << b1*b2  << endl;
+	
+
+
 
 	// cout << "b = " << b << endl;
 	// cout << "b1 = " << b1 << endl;
