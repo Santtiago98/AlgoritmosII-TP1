@@ -145,15 +145,94 @@ opt_number(string const &arg)
     }
 }*/
 
-void
-multiply(istream *is, ostream *os)
+std::string& ltrim(std::string& str, const std::string& chars = "\t\n\v\f\r ")
 {
-	int num;
+    str.erase(0, str.find_first_not_of(chars));
+    return str;
+}
+ 
+std::string& rtrim(std::string& str, const std::string& chars = "\t\n\v\f\r ")
+{
+    str.erase(str.find_last_not_of(chars) + 1);
+    return str;
+}
+ 
+std::string& trim(std::string& str, const std::string& chars = "\t\n\v\f\r ")
+{
+    return ltrim(rtrim(str, chars), chars);
+}
 
-	while (*is >> num) {
-		*os << num * precision
-		    << "\n";
+
+const bignum calculate_expression(const string & str){
+
+    string operations_symbols = "+-*";
+    size_t delimPos;
+    bignum result(precision);
+    
+
+    if((delimPos = str.find_first_of(operations_symbols))!= string::npos ){
+    	
+    	if(delimPos == 0){
+	    	if((delimPos = str.substr(1, str.length()).find_first_of(operations_symbols)) != string::npos ){
+	    	   	delimPos += 1;
+	    	}
+	    	else{
+	    		cerr << "Invalid Expression" <<endl;
+				exit(1);
+	    	}
+		}
+ 
+		//Spliteo la expresion para obtener operandos
+		string s1 = str.substr(0, delimPos);
+		string s2 = str.substr(delimPos+1, str.length());
+
+		//Creo bignum desde string eliminando los espacios
+		bignum op1(trim(s1),precision);
+		bignum op2(trim(s2),precision);
+		
+
+		//Hago operacion detectada en el string
+		switch(str[delimPos]){
+			case '+':
+				result = op1 + op2;
+				break;
+
+			case '-':
+				result = op1 - op2;
+				break;
+			case '*':
+				//res = op1 * op2;
+				break;
+			default:
+				cerr << "Invalid Operation" <<endl;
+				exit(1);
+		}
+
 	}
+
+	else{
+		cerr << "Invalid Expression" <<endl;
+		exit(1);
+	}	
+
+	return result;
+
+}
+
+
+void
+calculate(istream *is, ostream *os)
+{
+	string str;
+
+    while(getline(*iss, str)){
+    	
+    	//Omito linea si la expresion es vacia
+    	if(str != ""){
+	    	bignum result = calculate_expression(str);
+	    	*oss << result << endl;    		
+    	}
+    }
 
 	if (os->bad()) {
 		cerr << "cannot write to output stream."
@@ -172,18 +251,24 @@ multiply(istream *is, ostream *os)
 	}
 }
 
+
+
 int
 main(int argc, char * const argv[])
 {
-    string str;
-    int aux=0;
     
+
+
 	cmdline cmdl(options);	
 	cmdl.parse(argc, argv);
     
     // at this point the parser should've quit the program if any argument is wrong or missing
 
-    getline(*iss, str);
-    *oss << str << endl;
-    
+	//Hago todos los calculos que haya en iss o me quedo esperando si es cin
+	calculate(iss, oss);
+
+
+
+    return 0;
 }
+
