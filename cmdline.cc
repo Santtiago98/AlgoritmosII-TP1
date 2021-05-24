@@ -50,6 +50,7 @@ cmdline::parse(int argc, char * const argv[])
 		// Todos los parámetros de este programa deben
 		// pasarse en forma de opciones. Encontrar un
 		// parámetro no-opción es un error.
+        // LA OPERACION DEBE SER EL ULTIMO PARAMETRO A PASAR
 
 		if (argv[i][0] != '-') {
 			cerr << "Invalid non-option argument: "
@@ -62,11 +63,12 @@ cmdline::parse(int argc, char * const argv[])
 		// opciones; todo los argumentos que puedan
 		// estar a continuación no son interpretados
 		// como opciones.
-
+        /* ESTO NO SERIA CORRECTO POR LOS EJEMPLOS DE LA SECCION 4.4
 		if (argv[i][1] == '-'
 		    && argv[i][2] == 0)
 			break;
-
+            */
+            
 		// Finalmente, vemos si se trata o no de una
 		// opción larga; y llamamos al método que se
 		// encarga de cada caso.
@@ -77,12 +79,14 @@ cmdline::parse(int argc, char * const argv[])
 			i += do_short_opt(&argv[i][1], argv[i + 1]);
 	}
 
+    
+
 	// Segunda pasada: procesamos aquellas opciones que,
 	// (1) no hayan figurado explícitamente en la línea 
 	// de comandos, y (2) tengan valor por defecto.
 	
 	for (option_t *op = option_table; !END_OF_OPTIONS(op); ++op) {
-#define OPTION_NAME(op) \
+    #define OPTION_NAME(op) \
 	(op->short_name ? op->short_name : op->long_name)
 		if (op->flags & OPT_SEEN)
 			continue;

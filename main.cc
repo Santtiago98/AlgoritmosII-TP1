@@ -3,17 +3,18 @@
 #include <iostream>
 #include <sstream>
 #include <cstdlib>
+#include <string>
 
 #include "bignum.h"
 #include "cmdline.h"
 
 using namespace std;
 
-#define PRECISION_DEFAULT_ "10"
 
 static void opt_input(string const &);
 static void opt_output(string const &);
 static void opt_precision(string const &);
+//static void opt_number(string const &, int const, char * const argv[]);
 static void opt_help(string const &);
 
 
@@ -23,7 +24,7 @@ static option_t options[] = {
 	{1, "o", "output", "-", opt_output, OPT_DEFAULT},
 	{1, "p", "precision", PRECISION_DEFAULT_, opt_precision, OPT_DEFAULT},
 	{0, "h", "help", NULL, opt_help, OPT_DEFAULT},
-    {1, "", "", NULL, opt_number, OPT_DEFAULT},
+    //{1, "", "", OPERATION_DEFAULT, opt_number, OPT_DEFAULT},
 	{0, },
 };
 
@@ -124,10 +125,25 @@ opt_precision(string const &arg)
 static void
 opt_help(string const &arg)
 {
-	cout << "cmdline -p precision [-i file] [-o file] operation"
+	cout << "cmdline [-p precision] [-i file] [-o file]"
 	     << endl;
 	exit(0);
 }
+
+/*static void
+opt_number(string const &arg)
+{
+    
+    // si esta funcion se activa es que ningun argumento falló antes
+    // debo chequear que se haya ingresado una operacion 
+    // o que no se haya ingresado nada
+    
+    if (arg == OPERATION_DEFAULT)
+    {
+        cout << "op_number f() " << endl;
+        
+    }
+}*/
 
 void
 multiply(istream *is, ostream *os)
@@ -159,10 +175,15 @@ multiply(istream *is, ostream *os)
 int
 main(int argc, char * const argv[])
 {
-	cmdline cmdl(options);	
-	cmdl.parse(argc, argv); 
-    //*oss << "precision: " << precision +1 << endl;
-    // at this point the parser should've quit the program if any argument is wrong or missing
+    string str;
+    int aux=0;
     
-		    
+	cmdline cmdl(options);	
+	cmdl.parse(argc, argv);
+    
+    // at this point the parser should've quit the program if any argument is wrong or missing
+
+    getline(*iss, str);
+    *oss << str << endl;
+    
 }
