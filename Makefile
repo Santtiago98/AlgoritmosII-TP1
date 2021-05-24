@@ -8,6 +8,7 @@ CC = g++
 
 
 all: tp0.exe
+	rm *.o
 
 
 tp0.exe: main.o bignum.o cmdline.o
