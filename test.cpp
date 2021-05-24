@@ -9,15 +9,18 @@ using namespace std;
 
 int main(){
 	
-	// std::string s("-100");
-	// std::string s2("15");
+	std::string s("9999");
+	std::string s2("25");
 	
-	// bignum b;
-	// bignum b1(11);
-	// bignum b2(s,50);
-	// bignum b2_(s2,50);
-	cout << "hola mundo" << endl;
+	bignum b;
+	bignum b1 = 124;
+	bignum b2(s,4);
+	bignum b2_(s2,4);
+	//cout << "hola mundo" << endl;
 	
+	cout << b1 << endl;
+	cout << b2_ << "+" << b2 << "=" << b2 + b2_ << endl;
+
 	// cout << "b = " << b << endl;
 	// cout << "b1 = " << b1 << endl;
 	// cout << "-b1 = " <<  -b1 << endl;
@@ -57,11 +60,14 @@ int main(){
 	
 	// cout << "b30 = " << b30 << endl;
 	
-	bignum b_int = 120;
-	bignum b_int2 = -12234;
+	// bignum b_int = 2147483647;
+	// bignum b_int2 = 2147483647;
 	
-	cout << "b_int = " << b_int << endl;
-	cout << "b_int2 = " << b_int2 << endl;
+	// cout << "b_int = " << b_int << endl;
+	// cout << "b_int2 = " << b_int2 << endl;
+	
+	// cout << "b_int + b_int2 = " << b_int+b_int2 << endl;
+	// cout << "en realidad es = " << 2147483647+2147483647 << endl;
 	// cout << "b_int precision = " << b_int.prec() << endl;
 	// cout << "b_int effective size = " << b_int.eff_size() << endl;
 	
