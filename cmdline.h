@@ -8,6 +8,10 @@
 #define OPT_SEEN      1
 #define OPT_MANDATORY 2
 
+#define PRECISION_DEFAULT_ "10"
+#define OPERATION_DEFAULT "OP_DEFAULT"
+
+
 struct option_t {
 	int has_arg;
 	const char *short_name;
