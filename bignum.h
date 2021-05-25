@@ -4,7 +4,8 @@
 #include <iostream>
 #include <string>
 #include <algorithm>
-#include <math.h> 
+#include <math.h>
+#include <exception>
 #include "./bignum.h"
 
 #ifndef BIGNUM_PRECISION_DEFAULT

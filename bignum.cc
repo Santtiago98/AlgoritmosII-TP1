@@ -94,7 +94,11 @@ bool bignum::is_negative() const {
 
 bignum::~bignum(){
 	
-	delete []digits;
+	if( digits != NULL){
+		
+		delete []digits;
+		
+	}
 	
 }
 
@@ -136,7 +140,7 @@ bignum::bignum(const int n, const unsigned short p=BIGNUM_PRECISION_INT){
 	
 	//cout << "POR INT" <<endl;
 	// ---- SETEO DE SIGNO ---- //
-	// me quedo solo con la parte absoluta de n
+	// se toma en cuenta solo con la parte absoluta de n
 	if( n < 0 ){
 		
 		negative = true;
@@ -153,6 +157,7 @@ bignum::bignum(const int n, const unsigned short p=BIGNUM_PRECISION_INT){
 	// ---- LOOP ---- //
 	for( int i=0 ; i < precision ; i++){
 		
+		//si aux es 0 y hay digitos por escribir, se ponen en 0
 		if( aux == 0 ){
 			
 			for(int j = effective_size; j < precision ; j++ ){
@@ -163,16 +168,11 @@ bignum::bignum(const int n, const unsigned short p=BIGNUM_PRECISION_INT){
 			break;
 			
 		}
-		else if( aux < 10 ){
-			
-			digits[i] = aux%10;
-			effective_size = i+1;
-			break;
-			
-		}
+
 		else{ 
 
 			digits[i] = aux%10;
+			effective_size = i+1;
 			aux -= aux%10;
 			aux /= 10;
 
@@ -182,7 +182,7 @@ bignum::bignum(const int n, const unsigned short p=BIGNUM_PRECISION_INT){
 
 	}
 	
-	if ( (aux < 10) == false ){
+	if ( aux != 0 ){
 		
 		delete[] digits;
 		throw std::range_error(BIGNUM_MSG_ERR_PRECISION);
@@ -220,7 +220,10 @@ bignum::bignum(std::string const & s_, const unsigned short p) : precision(p){
 	std::reverse(s.begin() + neg , s.end() );
 	
 	if( int( s.length() ) > precision + neg ){
+		
+		delete[] digits;
 		throw std::range_error(BIGNUM_MSG_ERR_PRECISION);
+		
 	}
 	
 	for(long unsigned int i=0  ; ( i <  s.length()  - neg )  & ( i < precision ) ; i++ ){
@@ -229,7 +232,7 @@ bignum::bignum(std::string const & s_, const unsigned short p) : precision(p){
 		
 		if( ( s[ i+neg ] < '0' ) | ( s[ i+neg ] > '9' )  ){
 			
-			digits[i] = 0;
+			delete[] digits;
 			throw std::invalid_argument(BIGNUM_MSG_ERR_INVALID_CHARS);
 		
 		}
@@ -252,10 +255,10 @@ bignum::bignum(std::string const & s_, const unsigned short p) : precision(p){
 
 bignum::bignum(const char * c_arr, const unsigned short p) : precision(p){
 	
-	std::string s(c_arr);
-	digits = NULL;
-	*this = bignum(s,p);
-
+	std::string s(c_arr); //se castea a string
+	digits = NULL; //si no se pone en NULL, la asignación fallará
+	*this = bignum(s,p); //se usa el constructor de sting
+	
 }
 
 bignum::bignum(bignum const &b) : precision(b.precision) , effective_size(b.effective_size) , negative(b.negative){
@@ -465,6 +468,7 @@ const bignum operator-(const bignum& b1, const bignum& b2){
 	}
 	
 	b3.effective_size = size(b3);
+	b3.negative = false;
 	return b3;
 	
 }
@@ -580,10 +584,6 @@ const bignum & bignum::operator=(const int &n){
 		aux = -n;
 		
 	}
-    else if (s[0] == '+'){
-        negative = false;
-        neg = 1;
-    }
 	else{
 		
 		negative = false;
