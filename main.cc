@@ -124,9 +124,25 @@ opt_precision(string const &arg)
 
 static void
 opt_help(string const &arg)
-{
-	cout << "cmdline [-p precision] [-i file] [-o file]"
+{	
+	cout << "FIUBA - 95.12 Algoritmos y Programación II - 2021 C1 - Grupo C - Anus, Aupi, Boudjikanian - TP0"
+		 << endl
 	     << endl;
+	cout << "Program help"
+	     << endl;
+	cout << "cmdline options: "
+		 << endl
+		 << "[-p precision] define precision used by program (number of digits use to represent the number), by default " << BIGNUM_PRECISION_DEFAULT << " is used"
+		 << endl
+		 << "[-i file] define input file, by default stdin"
+		 << endl
+		 << "[-o file] define output file, by default stdout"
+	     << endl
+		 << "[-h] prints a basic help"
+	     << endl;
+	cout << endl
+	     << "Developed by marto-chiqui-panter"
+		 << endl;
 	exit(0);
 }
 
@@ -288,4 +304,3 @@ main(int argc, char * const argv[])
 
     return 0;
 }
-
