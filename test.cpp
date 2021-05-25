@@ -11,24 +11,25 @@ int main(){
 	
 	//std::string s("9999");
 	//std::string s2("25");
-try{
 
 	int a = -13;
 	int b = 24;
 
-	string s1("222");
-	string s2("-933");
+	string s1("2as22");
+	string s2("-9331324");
 
 	bignum b1(s1, 30);
-	bignum b2(s2, 30);
-	bignum c("-1256",5);
+	bignum b2(s2, 3);
+	bignum c("-12asdas56",5);
 	bignum bint(23554,5);
 	
 	cout << "bint = " << bint << endl;
 	cout << "bint precision " << bint.prec() << endl;
 	cout << "bint eff size = " << bint.eff_size() << endl;
 	
-	cout << "c = " << c << endl;
+	cout << "c is bad? " << c.bad() << endl;
+	
+	cout << "c = " << c << "eff y prec:" << c.eff_size() << c.prec() << endl;
 	cout << "b1 = " << b1 << "; b2 = " << b2 << endl;
 	b1 += b2;
 	
@@ -63,6 +64,14 @@ try{
 	
 
 	cin >> b1 ;
+	
+	if ( b1.bad() ){
+		
+		cout << "b1 is bad" << endl;
+		return 1;
+		
+	}
+	
 	cout << b1 << endl;
 
 	// cout << "b = " << b << endl;
@@ -137,13 +146,6 @@ try{
 	// cout << "s_: " << s_ << endl;
 	
 	// cout << "s: " << s << endl;
-}
 
-catch( exception& e ){
-	
-	cout << "ERROR MESSAGE: " << e.what() << endl;
-	return 1;
-	
-}
 
 }

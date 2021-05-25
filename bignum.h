@@ -24,6 +24,10 @@
 #define BIGNUM_MSG_ERR_INVALID_CHARS "THE INPUT CHARS SHOULD BE DIGITS"
 #endif
 
+#ifndef BIGNUM_MSG_ERR_BAD
+#define BIGNUM_MSG_ERR_BAD "NaN"
+#endif
+
 using namespace std;
 
 class bignum{
@@ -50,6 +54,7 @@ class bignum{
 		unsigned short eff_size(void) const;
 		bool is_negative() const;
 		bool sign() const ;
+		bool bad() const;
 	
 	// --- DESTRUCTOR --- //
 		~bignum();

@@ -55,6 +55,12 @@ unsigned short min_size(const bignum& b1, const bignum& b2){
 
 unsigned short size( bignum const &b ){	
 	
+	if( b.digits == NULL ){
+		
+		return 0;
+		
+	}
+	
 	// se empieza a iterar desde el ultimo digito hasta encontrar el primero distinto de 0
 	for( int i = b.precision - 1 ; i >= 0 ; i-- ){
 		
@@ -88,6 +94,21 @@ unsigned short size( bignum const &b ){
 
 bool bignum::is_negative() const {
 	return negative;
+}
+
+bool bignum::bad() const {
+	
+	if( digits == NULL ){
+		//si está mal formado el bignum, el puntero está a NULL
+		return true;
+		
+	}
+	else{
+		
+		return false;
+		
+	}
+
 }
 
 // ------------------ DESTRUCTOR ------------------ //
@@ -185,7 +206,9 @@ bignum::bignum(const int n, const unsigned short p=BIGNUM_PRECISION_INT){
 	if ( aux != 0 ){
 		
 		delete[] digits;
-		throw std::range_error(BIGNUM_MSG_ERR_PRECISION);
+		digits = NULL;
+		effective_size = 0;
+		negative = false;
 		
 	}
 	
@@ -222,7 +245,10 @@ bignum::bignum(std::string const & s_, const unsigned short p) : precision(p){
 	if( int( s.length() ) > precision + neg ){
 		
 		delete[] digits;
-		throw std::range_error(BIGNUM_MSG_ERR_PRECISION);
+		digits = NULL;
+		effective_size = 0;
+		negative = false;
+		precision = 0;
 		
 	}
 	
@@ -233,7 +259,11 @@ bignum::bignum(std::string const & s_, const unsigned short p) : precision(p){
 		if( ( s[ i+neg ] < '0' ) | ( s[ i+neg ] > '9' )  ){
 			
 			delete[] digits;
-			throw std::invalid_argument(BIGNUM_MSG_ERR_INVALID_CHARS);
+			digits = NULL;
+			effective_size = 0;
+			precision = 0;
+			negative = false;
+			break;
 		
 		}
 		else{
@@ -257,13 +287,24 @@ bignum::bignum(const char * c_arr, const unsigned short p) : precision(p){
 	
 	std::string s(c_arr); //se castea a string
 	digits = NULL; //si no se pone en NULL, la asignación fallará
-	*this = bignum(s,p); //se usa el constructor de sting
+	bignum b1(s,p); //se usa el constructor de sting
+	*this = b1;
 	
 }
 
 bignum::bignum(bignum const &b) : precision(b.precision) , effective_size(b.effective_size) , negative(b.negative){
 	
 	// CONSTRUCTOR COPIA //
+	
+	if( b.digits == NULL ){
+		
+		digits = NULL;
+		effective_size = 0;
+		precision = 0;
+		negative = false;
+		return;
+		
+	}
 	
 	digits = new unsigned short[precision];
 	
@@ -328,6 +369,23 @@ bignum const bignum::operator*=(const int n){
 
 const bignum operator+(const bignum& b1, const bignum& b2){
 	
+	unsigned short p = max_precision( b1 , b2 );
+	unsigned short aux=0; //variable auxiliar para guardar cada valor de la iteración
+	unsigned short carry = 0;	//carry de la suma de cada digito
+	bignum b3(p);
+	b3.effective_size = 0;
+	
+	if( (b1.digits == NULL) | (b2.digits == NULL) ){
+		
+		delete[] b3.digits;
+		b3.digits = NULL;
+		b3.precision = 0;
+		b3.effective_size = 0;
+		b3.negative = false;
+		return b3;
+		
+	}
+	
 	if( ( b1.negative == true ) & ( b2.negative == true ) ){
 
 		return -((-b1)+(-b2));
@@ -353,14 +411,6 @@ const bignum operator+(const bignum& b1, const bignum& b2){
 	}
 	
 	// --- ASUMO AMBOS POSITIVOS Y B1 > B2 --- //
-	
-	unsigned short p = max_precision( b1 , b2 );
-	
-	unsigned short aux=0; //variable auxiliar para guardar cada valor de la iteración
-	unsigned short carry = 0;	//carry de la suma de cada digito
-	
-	bignum b3(std::string("0"),p);
-	b3.effective_size = 0;
 	
 	for( int i=0 ; i < b2.effective_size ; i++ ){
 		
@@ -391,7 +441,11 @@ const bignum operator+(const bignum& b1, const bignum& b2){
 	else if( carry>0 ){
 	
 		delete[] b3.digits;
-		throw std::range_error("precision is not enough");
+		b3.digits = NULL;
+		b3.precision = 0;
+		b3.effective_size = 0;
+		b3.negative = false;
+		return b3;
 		
 	}
 	
@@ -402,6 +456,22 @@ const bignum operator+(const bignum& b1, const bignum& b2){
 }
 
 const bignum operator-(const bignum& b1, const bignum& b2){
+	
+	unsigned short p = max_precision( b1 , b2 );
+	unsigned short carry = 0;
+	
+	bignum b3(p);
+	
+	if( (b1.digits == NULL) | (b2.digits == NULL) ){
+		
+		delete[] b3.digits;
+		b3.digits = NULL;
+		b3.precision = 0;
+		b3.effective_size = 0;
+		b3.negative = false;
+		return b3;
+		
+	}
 	
 	if( ( b1.negative == true ) & ( b2.negative == false ) ){
 	
@@ -428,10 +498,6 @@ const bignum operator-(const bignum& b1, const bignum& b2){
 	
 	//---- CASO BASE ---- //
 	// b1 > b2
-	unsigned short p = max_precision( b1 , b2 );
-	unsigned short carry = 0;
-	
-	bignum b3(p);
 	
 	for( int i=0 ; i < b2.effective_size ; i++ ){
 		//effective_size es siempre menor o igual a precision
@@ -476,7 +542,7 @@ const bignum operator-(const bignum& b1, const bignum& b2){
 const bignum operator-(const bignum& b1){
 	
 	bignum b2(b1);
-	bignum b_0("0",1);
+	bignum b_0(0,1);
 	
 	if( b1 == b_0 ){
 		
@@ -510,10 +576,22 @@ const bignum operator*(const bignum& b1, const bignum& b2){
 	unsigned short carry ;	//carry del producto de cada digito
 	int base = 10;
 
+	bignum b3(p);
+	
+	if( (b1.digits == NULL) | (b2.digits == NULL) ){
+		
+		delete[] b3.digits;
+		b3.digits = NULL;
+		b3.precision = 0;
+		b3.effective_size = 0;
+		b3.negative = false;
+		return b3;
+		
+	}
 	
 	// El producto b1[1..p] y b2[1..q] tiene largo p+q[-1] dependiendo del carry final
 	if((b1.effective_size + b2.effective_size)  <= p + 1){
-		bignum b3(p);
+		
 		
 		for(int i = 0; i<b2.effective_size;i++){
 			carry=0;
@@ -530,7 +608,11 @@ const bignum operator*(const bignum& b1, const bignum& b2){
 			//Si calculo el producto y la precision no me alcanza para agregar el ultimo carry --> error				
 			else{
 				delete[] b3.digits;
-				throw std::range_error("precision is not enough");
+				b3.digits = NULL;
+				b3.precision = 0;
+				b3.effective_size = 0;
+				b3.negative = 0;
+				return b3;
 			}
 			
 		}
@@ -543,12 +625,26 @@ const bignum operator*(const bignum& b1, const bignum& b2){
 		return b3;
 	}
 
-	throw std::range_error(BIGNUM_MSG_ERR_PRECISION);
+	b3.digits = NULL;
+	b3.precision = 0;
+	b3.effective_size = 0;
+	b3.negative = 0;
+	return b3;
 }
 
 // ------------------ ASIGNACIONES ------------------ //
 
 const bignum & bignum::operator=(const bignum &b){
+	
+	if( b.digits == NULL ){
+		
+		digits = NULL;
+		effective_size = 0;
+		precision = 0;
+		negative = false;
+		return *this;
+		
+	}
 	
 	if( digits != NULL ){
 		
@@ -620,6 +716,12 @@ const bignum & bignum::operator=(const int &n){
 
 bool operator<(bignum const &b1, bignum const &b2){
 	
+	if( (b1.digits == NULL) | (b2.digits == NULL) ){
+	
+		return false;
+		
+	}
+	
 	if(  b1.negative & !b2.negative ){
 		
 		return true;
@@ -681,6 +783,12 @@ bool operator<(bignum const &b1, bignum const &b2){
 
 bool operator>(bignum const &b1, bignum const &b2){
 	
+	if( (b1.digits == NULL) | (b2.digits == NULL) ){
+	
+		return false;
+		
+	}
+	
 	if( b1 == b2 ){
 		
 		return false;
@@ -696,6 +804,12 @@ bool operator>(bignum const &b1, bignum const &b2){
 }
 
 bool operator==(bignum const &b1, bignum const &b2){
+	
+	if( (b1.digits == NULL) | (b2.digits == NULL) ){
+	
+		return false;
+		
+	}
 	
 	if(  b1.negative != b2.negative ){
 		
@@ -729,6 +843,12 @@ bool operator==(bignum const &b1, bignum const &b2){
 
 bool operator>=(bignum const &b1, bignum const &b2){
 	
+	if( (b1.digits == NULL) | (b2.digits == NULL) ){
+	
+		return false;
+		
+	}
+	
 	if( (b1 == b2) | (b1>b2) ){
 		
 		return true;
@@ -744,6 +864,12 @@ bool operator>=(bignum const &b1, bignum const &b2){
 }
 
 bool operator<=(bignum const &b1, bignum const &b2){
+	
+	if( (b1.digits == NULL) | (b2.digits == NULL) ){
+	
+		return false;
+		
+	}
 	
 	if( (b1 == b2) | (b1<b2) ){
 		
@@ -768,6 +894,12 @@ std::ostream& operator<<(std::ostream& os, const bignum& b){
 	
 	//cout << "print bignum:" << endl;
 	//cout << "precision " << b.precision << endl;
+	
+	if( b.digits == NULL ){
+		
+		os << BIGNUM_MSG_ERR_BAD;
+		return os;
+	}
 	
 	if ( b.negative ){
 		os << "-";
@@ -797,6 +929,17 @@ std::istream& operator>>(std::istream& is, bignum& b){
 	is >> s ;
 	
 	bignum b1(s,b.precision);
+	
+	if( b1.digits == NULL ){
+		
+		delete [] b.digits;
+		b.digits = NULL;
+		b.precision = 0;
+		b.effective_size = 0;
+		b.negative = false;
+		return is;
+		
+	}
 	
 	b = b1;
 	
