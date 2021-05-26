@@ -14,7 +14,6 @@ using namespace std;
 static void opt_input(string const &);
 static void opt_output(string const &);
 static void opt_precision(string const &);
-//static void opt_number(string const &, int const, char * const argv[]);
 static void opt_help(string const &);
 
 
@@ -24,7 +23,6 @@ static option_t options[] = {
 	{1, "o", "output", "-", opt_output, OPT_DEFAULT},
 	{1, "p", "precision", PRECISION_DEFAULT_, opt_precision, OPT_DEFAULT},
 	{0, "h", "help", NULL, opt_help, OPT_DEFAULT},
-    //{1, "", "", OPERATION_DEFAULT, opt_number, OPT_DEFAULT},
 	{0, },
 };
 
@@ -132,7 +130,7 @@ opt_help(string const &arg)
 	     << endl;
 	cout << "cmdline options: "
 		 << endl
-		 << "[-p precision] define precision used by program (number of digits use to represent the number), by default " << BIGNUM_PRECISION_DEFAULT << " is used"
+		 << "[-p precision] define precision used by program (number of digits use to represent the number), default is " << BIGNUM_PRECISION_DEFAULT 
 		 << endl
 		 << "[-i file] define input file, by default stdin"
 		 << endl
@@ -146,20 +144,6 @@ opt_help(string const &arg)
 	exit(0);
 }
 
-/*static void
-opt_number(string const &arg)
-{
-    
-    // si esta funcion se activa es que ningun argumento falló antes
-    // debo chequear que se haya ingresado una operacion 
-    // o que no se haya ingresado nada
-    
-    if (arg == OPERATION_DEFAULT)
-    {
-        cout << "op_number f() " << endl;
-        
-    }
-}*/
 
 std::string& ltrim(std::string& str, const std::string& chars = "\t\n\v\f\r ")
 {
@@ -188,7 +172,9 @@ const bignum calculate_expression(const string & str){
 
     
     if((delimPos = str.find_first_of(operations_symbols))!= string::npos ){
-    	
+        //cout << "str: " << str << endl;
+    	//cout << "delim: " << delimPos << endl;
+        
     	// Chequeo si hay un '+/-' al principio
     	if(delimPos == 0){
 	    	if((delimPos = str.find_first_of(operations_symbols,1)) == string::npos ){
@@ -201,7 +187,8 @@ const bignum calculate_expression(const string & str){
 		// Spliteo la expresion para obtener operandos
 		string s1 = str.substr(0, delimPos);
 		string s2 = str.substr(delimPos+1, str.length());
-        // Elimino los espacioes
+        
+        // Elimino los espacioes y caracteres espurios
         s1 = trim(s1);
         s2 = trim(s2);
         
@@ -219,11 +206,28 @@ const bignum calculate_expression(const string & str){
             exit(1);           
             
         }
+        else if(((aux = s1.find_first_of(operations_symbols,1)) != string::npos)){
+            // se encontró otro operador luego del primer caracter inicial
+            cout << "Invalid operand." << endl;
+            exit(1);
+        }
+        else if ((aux = s1.find_first_of(operations_symbols)) == s1.length()-1){
+            cout << "Invalid operand." << endl;
+            exit(1);           
+            
+        }
         
-		// Creo bignum desde string eliminando los espacios
+        
+        
+		// Creo bignum desde string
 		bignum op1(s1,precision);
 		bignum op2(s2,precision);
-		
+        
+		if (op1.bad() || op2.bad()){
+            cout << "Invalid expresion." << endl;
+            exit(1);
+        }
+        
 
 		// Hago operacion detectada en el string
 		switch(str[delimPos]){
@@ -262,7 +266,7 @@ calculate(istream *is, ostream *os)
     	
     	//Omito linea si la expresion es vacia
     	if(str != ""){
-	    	bignum result = calculate_expression(str);
+	    	bignum result = calculate_expression(trim(str));
 	    	*oss << result << endl;    		
     	}
     }
