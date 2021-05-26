@@ -223,7 +223,7 @@ const bignum calculate_expression(const string & str){
 		bignum op1(s1,precision);
 		bignum op2(s2,precision);
         
-		if (op1.bad() || op2.bad()){
+		if (op1.bad() || op2.bad()){                        
             cout << "Invalid expresion." << endl;
             exit(1);
         }
@@ -257,37 +257,6 @@ const bignum calculate_expression(const string & str){
 }
 
 
-void
-calculate(istream *is, ostream *os)
-{
-	string str;
-
-    while(getline(*iss, str)){
-    	
-    	//Omito linea si la expresion es vacia
-    	if(str != ""){
-	    	bignum result = calculate_expression(trim(str));
-	    	*oss << result << endl;    		
-    	}
-    }
-
-	if (os->bad()) {
-		cerr << "cannot write to output stream."
-		     << endl;
-		exit(1);
-	}
-	if (is->bad()) {
-		cerr << "cannot read from input stream."
-		     << endl;
-		exit(1);
-	}
-	if (!is->eof()) {
-		cerr << "cannot find EOF on input stream."
-		     << endl;
-		exit(1);
-	}
-}
-
 
 
 int
@@ -302,7 +271,32 @@ main(int argc, char * const argv[])
     // at this point the parser should've quit the program if any argument is wrong or missing
 
 	//Hago todos los calculos que haya en iss o me quedo esperando si es cin
-	calculate(iss, oss);
+    string str;
+
+    while(getline(*iss, str)){
+    	
+    	//Omito linea si la expresion es vacia
+    	if(str != ""){
+	    	bignum result = calculate_expression(trim(str));
+	    	*oss << result << endl;    		
+    	}
+    }
+        
+	if (oss->bad()) {
+		cerr << "cannot write to output stream."
+		     << endl;
+		exit(1);
+	}
+	if (iss->bad()) {
+		cerr << "cannot read from input stream."
+		     << endl;
+		exit(1);
+	}
+	if (!iss->eof()) {
+		cerr << "cannot find EOF on input stream."
+		     << endl;
+		exit(1);
+	}
 
 
 
