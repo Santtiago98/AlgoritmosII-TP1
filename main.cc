@@ -252,6 +252,10 @@ const bignum calculate_expression(const string & str){
 		exit(1);
 	}	
 
+    if (result.bad()){                        
+        cout << "Out of precision." << endl;
+        exit(1);
+    }
 	return result;
 
 }
