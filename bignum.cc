@@ -175,6 +175,8 @@ bignum::bignum(const int n, const unsigned short p=BIGNUM_PRECISION_INT){
 		
 	}
 	
+	effective_size=0;
+	
 	// ---- LOOP ---- //
 	for( int i=0 ; i < precision ; i++){
 		
@@ -316,7 +318,19 @@ bignum::bignum(bignum const &b) : precision(b.precision) , effective_size(b.effe
 
 bignum const bignum::operator+=(const bignum&b2){
 	
-	*this = *this + b2;
+	bignum aux = *this;
+	
+	if( this->digits != NULL ){
+		
+		delete [] this->digits;
+		this->digits = NULL;
+		this->precision = 0;
+		this->effective_size = 0;
+		this->negative = false;
+		
+	}
+	
+	*this = aux + b2;
 	
 	return *this;
 	
@@ -324,7 +338,19 @@ bignum const bignum::operator+=(const bignum&b2){
 
 bignum const bignum::operator-=(const bignum&b2){
 	
-	*this = *this - b2;
+	bignum aux = *this;
+	
+	if( this->digits != NULL ){
+		
+		delete [] this->digits;
+		this->digits = NULL;
+		this->precision = 0;
+		this->effective_size = 0;
+		this->negative = false;
+		
+	}
+	
+	*this = aux - b2;
 	
 	return *this;
 	
@@ -332,7 +358,19 @@ bignum const bignum::operator-=(const bignum&b2){
 
 bignum const bignum::operator*=(const bignum&b2){
 	
-	*this = *this * b2;
+	bignum aux = *this;
+	
+	if( this->digits != NULL ){
+		
+		delete [] this->digits;
+		this->digits = NULL;
+		this->precision = 0;
+		this->effective_size = 0;
+		this->negative = false;
+		
+	}
+	
+	*this = aux*b2;
 	
 	return *this;
 	
@@ -341,7 +379,20 @@ bignum const bignum::operator*=(const bignum&b2){
 bignum const bignum::operator+=(const int n){
 	
 	bignum b2(n, precision);
-	*this = *this + b2;
+	
+	bignum aux = *this;
+	
+	if( this->digits != NULL ){
+		
+		delete [] this->digits;
+		this->digits = NULL;
+		this->precision = 0;
+		this->effective_size = 0;
+		this->negative = false;
+		
+	}
+	
+	*this = aux + b2;
 	
 	return *this;
 	
@@ -350,7 +401,20 @@ bignum const bignum::operator+=(const int n){
 bignum const bignum::operator-=(const int n){
 	
 	bignum b2(n, precision);
-	*this = *this - b2;
+	
+	bignum aux = *this;
+	
+	if( this->digits != NULL ){
+		
+		delete [] this->digits;
+		this->digits = NULL;
+		this->precision = 0;
+		this->effective_size = 0;
+		this->negative = false;
+		
+	}
+	
+	*this = aux - b2;
 	
 	return *this;
 	
@@ -359,7 +423,20 @@ bignum const bignum::operator-=(const int n){
 bignum const bignum::operator*=(const int n){
 	
 	bignum b2(n, precision);
-	*this = *this * b2;
+	
+	bignum aux = *this;
+	
+	if( this->digits != NULL ){
+		
+		delete [] this->digits;
+		this->digits = NULL;
+		this->precision = 0;
+		this->effective_size = 0;
+		this->negative = false;
+		
+	}
+	
+	*this = aux*b2;
 	
 	return *this;
 	
@@ -636,6 +713,12 @@ const bignum operator*(const bignum& b1, const bignum& b2){
 
 const bignum & bignum::operator=(const bignum &b){
 	
+	if( this == &b ){
+		
+		return *this;
+		
+	}
+	
 	if( b.digits == NULL ){
 		
 		digits = NULL;
@@ -646,7 +729,7 @@ const bignum & bignum::operator=(const bignum &b){
 		
 	}
 	
-	if( digits != NULL ){
+	if( digits != NULL  ){
 		
 		delete []digits;
 		
@@ -670,7 +753,13 @@ const bignum & bignum::operator=(const bignum &b){
 const bignum & bignum::operator=(const int &n){
 	
 	precision = BIGNUM_PRECISION_INT;
-	delete [] digits;
+	
+	if( digits != NULL  ){
+		
+		delete []digits;
+		
+	}
+	
 	digits = new unsigned short[precision];
 	int aux = 0;
 	
@@ -923,6 +1012,16 @@ std::ostream& operator<<(std::ostream& os, const bignum& b){
 
 std::istream& operator>>(std::istream& is, bignum& b){
 	// A DESARROLLAR JUNTO AL RETURN
+	
+	if( b.digits != NULL ){
+		
+		delete [] b.digits;
+		b.digits = NULL;
+		b.precision = 0;
+		b.effective_size = 0;
+		b.negative = false;
+		
+	}
 	
 	string s;
 	
