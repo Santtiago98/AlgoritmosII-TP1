@@ -3,7 +3,9 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
 #include "bignum.h"
+#include "bignum.cc"
 
 #ifndef DEFAULT_SIZE
 #define DEFAULT_SIZE  10
@@ -27,45 +29,52 @@ struct Symbols {
 template <class T>
 class Token{
     private:
-        bool _number, _operator, _binary;
+        bool _isnumber, _isoperator, _isbinary;
+        string _operator="";
         unsigned int _precedence;
-        T data;
+        
         
     public:
-        const bool isnumber();
-        const bool isoperator();
-        const bool isbinary();
+        T data;
+        const bool isnumber() const;
+        const bool isoperator() const;
+        const bool isbinary() const;
         Token();
         Token(string);
         
         // Asignaciones
         const Token<T> & operator=(const Token<T> &);
+        
+        // Lectura-Escritura 
+        template <class Y>
+        friend std::ostream& operator << (std::ostream&, const Token<Y>&);
 
 };
 /* ---- METODOS ---- */
 template <class T>
-const bool Token<T>::isnumber(){
-    return _number == true? true: false;
+const bool Token<T>::isnumber() const{
+    return _isnumber == true? true: false;
     }
 
 template <class T>
-const bool Token<T>::isoperator(){
-    return _operator == true? true: false;
+const bool Token<T>::isoperator() const{
+    return _isoperator == true? true: false;
     }
 
 template <class T>
-const bool Token<T>::isbinary(){
-    return _binary == true? true: false;
+const bool Token<T>::isbinary() const{
+    return _isbinary == true? true: false;
     }
 
 /* ---- CONSTRUCTORES ---- */
 template <class T>
 Token<T>::Token(){
-    _number = false;
-    _operator = false;
-    _binary = false;
+    _isnumber = true;
+    _isoperator = false;
+    _isbinary = false;
     _precedence = 0;
-    //data = NULL;
+    _operator = "";
+    data = T(69);
 }
 
 /* ---- OPERADORES ---- */
@@ -74,10 +83,11 @@ const Token<T> & Token<T>::operator=(const Token<T> & b){
     if( this == &b ){
         return *this;
 	}
-    _number = b._number;
-    _operator = b._operator;
-    _binary = b._binary;
+    _isnumber = b._isnumber;
+    _isoperator = b._isoperator;
+    _isbinary = b._isbinary;
     _precedence = b._precedence;
+    _operator = b._operator;
     data = b.data;
     
     return *this;
@@ -87,34 +97,52 @@ template <class T>
 Token<T>::Token(const string str){
     
     // el string debe estar limpio
-    int aux;
-    aux = str.find_first_of(simbols.operators);
-    if (aux != string::npos && aux == str.length() -1 ) {
+    size_t aux;
+    aux = str.find_first_of(simbols.operators+simbols.parenthesis);
+    if (aux != string::npos && aux +1 == str.length() ) {
         //  se encontro algun símbolo y no hay numeros
         switch(str[aux]){
             case '*':
             case '/':
                 _precedence = 3;
+                _operator = str;
                 break;
             case '+':
             case '-':
                 _precedence = 2;
+                _operator = str;
                 break;
         }
-        _operator = true;
-        _binary = true;
-        _number = false;
-        //data = sign;   // chequear como asignar esto para que no se fugue memoria ni se haga referencia a algo que muere
+        _isoperator = true;
+        _isbinary = true;
+        _isnumber = false;
+        _operator = str;
+        //data = T(str,999);   // chequear como asignar esto para que no se fugue memoria ni se haga referencia a algo que muere
     }
-    else if (aux != string::npos){
+    else {
         // el signo es un '+' o '-' y hay numeros
-        _operator = false;
-        _number = true; 
-        _precedence = 2;
-        _binary = false;
+        _isoperator = false;
+        _isnumber = true; 
+        _precedence = 0;
+        _isbinary = false;
         
-        data = T(str); //llamo al constructor del tipo elegido
+        data = T(str,999); //llamo al constructor del tipo elegido
         }
+    
+}
+
+// ------------------ LECTURA/ESCRITURA ------------------ //
+template <class T>
+std::ostream& operator << (std::ostream& os, const Token<T>& b){
+	
+	//os << "print bignum:" << endl;
+    if (b.isnumber()){
+        os << b.data << endl;
+    }else{
+        os << b._operator <<endl;
+    }
+    
+    return os;
 }
 
 // ---------------------------------------------------------------------------------------
@@ -150,9 +178,10 @@ Tokens<T>::Tokens(string exp){
 
 // ---------------------------------------------------------------------------------------
 template <class T> 
-void parseExpression(string const exp, Token<T> * b){
+void parseExpression(const string exp, vector<T> &b){
     // deja el puntero b apuntando a segmento de memoria correspondiente
     // exp es la expresion a parsear en tokens
+    T fp;
     
     unsigned long int L = exp.length();
     unsigned long int alloc_size = 0, used_size=0;
@@ -170,18 +199,22 @@ void parseExpression(string const exp, Token<T> * b){
     if (L==0){
         cout << "No expression to parse. Length = 0" << endl;
     }
-    
-    if ((b = new Token<T>[INIT_SIZE]) == NULL){
+    /*
+    if ((b = new T[INIT_SIZE]) == NULL){
         cout << "Can't initialice memory." << endl;
         exit(1);
-    } 
+    } */
+    
     alloc_size = INIT_SIZE;
        
     while (iter < L){
         aux = exp.find_first_of(simbols_1.parenthesis + simbols_1.operators, iter);
         if (aux==string::npos){
             // por si los ultimos caracteres son numeros
-            b[used_size++] = new Token<T> (exp.substr(iter, L-iter));
+            //b[used_size++] = T(exp.substr(iter, L-iter));
+            fp = T(exp.substr(iter, L-iter));
+            b.push_back(fp);
+            //cout << exp.substr(iter, L-iter) << endl;
             iter = L;
             break;
         }
@@ -191,13 +224,17 @@ void parseExpression(string const exp, Token<T> * b){
                 if ((aux2 = exp.find_first_of("+-", aux+1)) == (aux+1)){
                     // hay dos signos + - juntos
                     // debo verificar que luego haya algun numero o parentesis
-                    if(exp[aux+2] == '+' || exp[aux+2] == '-'){
+                    if(exp[aux+2] == '+' || exp[aux+2] == '-'
+                    || exp[aux+2] == '*'|| exp[aux+2] == '/'){
                         // hay 3 o mas caracteres + - juntos 
                         cout << "Mala expresion." << endl;
                         exit(1);    
                         break;
                     }
                     else{//el signo debe ser parte del numero                 
+                       // if(aux!=iter){cout << "numero: " << exp.substr(iter, aux-iter) << endl;}
+                        //cout << exp[aux] << endl; //me guardo este signo
+                       
                     }  
                 }
             case '*':
@@ -212,8 +249,22 @@ void parseExpression(string const exp, Token<T> * b){
                 if (used_size == alloc_size){
                     //copiar todo a otro array
                 }
-                b[used_size++] = new Token<T> (exp.substr(iter, aux-iter));
-                b[used_size++] = new Token<T> (exp[aux]);
+                // creo el numero si corresponde, o sea aux > iter
+                // para testear comentar estas 2 lineas
+                if(aux!=iter) {
+                    //b[used_size++] = T(exp.substr(iter, aux-iter));
+                    fp = T(exp.substr(iter, aux-iter));
+                    b.push_back(fp);
+                    }               
+                //b[used_size++] = T(exp.substr(aux,1)); // creo el operador 
+                fp = T(exp.substr(aux,1));
+                b.push_back(fp);
+                
+                // para testear descomento esto 
+                //if(aux!=iter){cout << "numero: " << exp.substr(iter, aux-iter) << endl;}
+                //cout << exp[aux] << endl;
+                
+                
                 iter = aux+1;   
         }
     }
@@ -221,18 +272,27 @@ void parseExpression(string const exp, Token<T> * b){
 
 
 
-int main(){
-    string exp="1+3*54";
+int main(){ // script para testear el funcionamiento 
+    string exp;
     
-    cout << "Operación a realizar" << endl;
-    //cin >> exp;
-    cout << "Expresion ingresada: " << exp << endl;
+    //Token<bignum> tok1("-69");
+    //cout << tok1;
     
-    Token<bignum> *bb;
-    parseExpression(exp, bb);
+    /*vector<Token<bignum>> bb;
+    bb.push_back(Token<bignum>("35"));
+    bb.push_back(Token<bignum>("*"));
+    cout << bb[0] << endl;
+    cout << bb[1] << endl;*/
     
-    delete [] bb;
     
+    while(true){
+        cin >> exp;
+        vector<Token<bignum>> bb; //Token<bignum> * bb=NULL;
+        parseExpression(exp, bb);   
+        for(size_t i=0; i< bb.size(); i++){
+            cout << bb[i] << endl;}
+        //delete [] bb;
+    }
 }
 
 #endif
