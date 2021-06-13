@@ -33,17 +33,26 @@ while there are tokens on the operator stack:
 #include <iostream>
 #include <string>
 #include <vector>
-#include "bignum.h"
+
 //#include "bignum.cc"
+#ifndef __STACK_H__
 #include "stack.hpp"
+#endif
+
+#ifndef _TOKEN_CPP_INCLUDED_
 #include "token.cpp"
+#endif
+
+#ifndef _BIGNUM_H_INCLUDED_
+#include "bignum.h"
+#endif
 
 
 #define ADD '+' 
 #define SUBSTRACT '-'
-#define  MULTIPLY '*'
-#define  DIVIDE '/'
-            
+#define MULTIPLY '*'
+#define DIVIDE '/'
+ 
 
 
 Stack<Token<bignum>> shunting_yard(vector<Token<bignum>> vect_tok)
@@ -139,8 +148,8 @@ bignum calculate(Stack<Token<bignum>> * stack){
                     return b2 - b1;
                 case MULTIPLY:
                     return b1 * b2;
-                case DIVIDE:
-                    return b2 / b1;
+                //case DIVIDE:
+                  //  return b2 / b1;
             }
     	}
     }
@@ -154,7 +163,7 @@ bignum calculate(Stack<Token<bignum>> * stack){
 
 }
 
-
+/*
 int main()
 {
 
@@ -172,4 +181,4 @@ int main()
     }
 
 	return 0;
-}
+}*/
