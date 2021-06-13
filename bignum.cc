@@ -103,8 +103,7 @@ bool bignum::bad() const {
 		return true;
 		
 	}
-	else{
-		
+	else{		
 		return false;
 		
 	}
@@ -284,6 +283,7 @@ bignum::bignum(std::string const & s_, const unsigned short p) : precision(p){
 	effective_size = size(*this);
 
 }
+
 
 bignum::bignum(const char * c_arr, const unsigned short p) : precision(p){
 	
@@ -993,8 +993,7 @@ std::ostream& operator<<(std::ostream& os, const bignum& b){
 	if ( b.negative ){
 		os << "-";
 	}
-	
-	
+		
 	for( int i = b.effective_size - 1 ; i >= 0 ; i-- ){
 		
 		os << b.digits[i];

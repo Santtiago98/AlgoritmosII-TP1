@@ -1,5 +1,8 @@
+#ifndef __STACK_H__
+#define __STACK_H__
+
 #include <iostream>
-using namespace std;
+//using namespace std;
 /************************************************
 *												*
 *		Template: Clase Stack.					*
@@ -7,8 +10,7 @@ using namespace std;
 *		Materia: Algoritmos y programacion ii	*
 *												*
 ************************************************/
-#ifndef __STACK_H__
-#define __STACK_H__
+
 
 template<typename T>
 class Stack

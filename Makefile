@@ -7,15 +7,14 @@ CFLAGS = -Wall --std=c++11
 CC = g++
 
 
-all: tp0.exe
+all: tp1.exe
 	rm *.o
 
+tp1.exe: main.o bignum.o cmdline.o token.o shunting_yard.o
+	$(CC) $(CFLAGS) -o tp1.exe cmdline.o bignum.o token.o main.o
 
-tp0.exe: main.o bignum.o cmdline.o
-	$(CC) $(CFLAGS) -o tp0.exe cmdline.o bignum.o main.o
-
-main.o: main.cc  bignum.h cmdline.h
-	$(CC) $(CFLAGS) -o main.o -c main.cc
+main.o: main.cc  bignum.h cmdline.h token.cpp stack.hpp 
+	$(CC) $(CFLAGS) -o main.o -c main.cc 
 
 cmdline.o: cmdline.cc cmdline.h
 	$(CC) $(CFLAGS) -o cmdline.o -c cmdline.cc
@@ -23,7 +22,9 @@ cmdline.o: cmdline.cc cmdline.h
 bignum.o: bignum.cc bignum.h
 	$(CC) $(CFLAGS) -o bignum.o -c bignum.cc
 
-
+token.o: token.cpp 
+	$(CC) $(CFLAGS) -o token.o -c token.cpp
+    
 clean: 
 	rm *.o
 
