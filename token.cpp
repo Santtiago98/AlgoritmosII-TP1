@@ -129,7 +129,6 @@ Token<T>::Token(const string str){
                 _isoperator = true;
                 _isbinary = true;  
                 _isbracket = false;                
-                //_symbol = str[aux];
                 break;
             case '+':
             case '-':
@@ -137,12 +136,13 @@ Token<T>::Token(const string str){
                 _isoperator = true;
                 _isbinary = true;
                 _isbracket = false;
-                //_symbol = str[aux];
                 break;
             case '(':
             case ')':
-                _isbracket = true;
+                _precedence = 0;
+                _isoperator = false;
                 _isbinary = false;
+                _isbracket = true;
                 break;
                 
         }
@@ -170,6 +170,7 @@ const Token<T> & Token<T>::operator=(const Token<T> & b){
 	}
     _isnumber = b._isnumber;
     _isoperator = b._isoperator;
+    _isbracket = b._isbracket;
     _isbinary = b._isbinary;
     _precedence = b._precedence;
     _symbol = b._symbol;
@@ -272,6 +273,7 @@ void parseExpression(const string exp, vector<T> &b){
                         std::cout << "Mala expresion." << endl;
                         exit(1);    
                         break;
+
                     }
                     else{//el signo aux2 debe ser parte del numero      
                         if(aux!=iter) { //por si hay nums entre iter y aux
