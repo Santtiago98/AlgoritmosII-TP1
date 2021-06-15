@@ -8,20 +8,10 @@
 
 
 #include "cmdline.h"
-
-#ifndef _BIGNUM_H_INCLUDED_
 #include "bignum.h"
-#endif
-
-
-#ifndef __TOKEN_CPP__
-#include "token.cpp"
-#endif
-
-#ifndef __STACK_H__
+#include "token.hpp"
 #include "stack.hpp"
-#endif
-
+#include "shunting_yard.h"
 
 using namespace std;
 
@@ -183,103 +173,27 @@ std::string& trim(std::string& str, const std::string& chars = "\t\n\v\f\r ")
     return ltrim(rtrim(str, chars), chars);
 }
 
-
-const bignum calculate_expression(const string & str){
-
-    string operations_symbols = "+-*";
-    size_t delimPos;
-    size_t aux=0;
-    bignum result(precision);
-
-    
-    if((delimPos = str.find_first_of(operations_symbols))!= string::npos ){
-        //cout << "str: " << str << endl;
-    	//cout << "delim: " << delimPos << endl;
-        
-    	// Chequeo si hay un '+/-' al principio
-    	if(delimPos == 0){
-	    	if((delimPos = str.find_first_of(operations_symbols,1)) == string::npos ){
-                // no se encontró otro operador 
-	    		cerr << "Invalid expression." <<endl;
-				exit(1);
-	    	}
-		}
+// Function to remove all spaces from a given string
+void removeSpaces(std::string & str)
+{
+    // To keep track of non-space character count
+    int count = 0;
  
-		// Spliteo la expresion para obtener operandos
-		string s1 = str.substr(0, delimPos);
-		string s2 = str.substr(delimPos+1, str.length());
-        
-        // Elimino los espacioes y caracteres espurios
-        s1 = trim(s1);
-        s2 = trim(s2);
-        
-        if (s1.length() == 0 || s2.length() == 0){
-            cout << "Missing operand." << endl;
-            exit(1);
-        }
-        else if(((aux = s2.find_first_of(operations_symbols,1)) != string::npos)){
-            // se encontró otro operador luego del primer caracter inicial
-            cout << "Invalid operand." << endl;
-            exit(1);
-        }
-        else if ((aux = s2.find_first_of(operations_symbols)) == s2.length()-1){
-            cout << "Invalid operand." << endl;
-            exit(1);           
-            
-        }
-        else if(((aux = s1.find_first_of(operations_symbols,1)) != string::npos)){
-            // se encontró otro operador luego del primer caracter inicial
-            cout << "Invalid operand." << endl;
-            exit(1);
-        }
-        else if ((aux = s1.find_first_of(operations_symbols)) == s1.length()-1){
-            cout << "Invalid operand." << endl;
-            exit(1);           
-            
-        }
-        
-        
-        
-		// Creo bignum desde string
-		bignum op1(s1,precision);
-		bignum op2(s2,precision);
-        
-		if (op1.bad() || op2.bad()){                        
-            cout << "Invalid expresion." << endl;
-            exit(1);
-        }
-        
-
-		// Hago operacion detectada en el string
-		switch(str[delimPos]){
-			case '+':
-				result = op1 + op2;
-				break;
-			case '-':
-				result = op1 - op2;
-				break;
-			case '*':
-				result = op1 * op2;
-				break;
-			default:
-				cerr << "Invalid operation." <<endl;
-				exit(1);
-		}
-	}
-
-	else{
-		cerr << "Invalid Expression" <<endl;
-		exit(1);
-	}	
-
-    if (result.bad()){                        
-        cout << "Out of precision." << endl;
-        exit(1);
+    // Traverse the given string. If current character
+    // is not space, then place it at index 'count++'
+    for (size_t i = 0; i<str.length(); i++)
+        if (str[i] != ' ')
+            str[count++] = str[i]; 
+    str.erase(count,str.length());
+    
+    size_t aux=0;
+    while((aux=str.find_first_of('\t')) != string::npos){
+        str.erase(aux, 1);
+        // cout << str << endl;
+        // cout << aux << endl;
     }
-	return result;
-
+    
 }
-
 
 
 #define ADD '+' 
@@ -288,163 +202,63 @@ const bignum calculate_expression(const string & str){
 #define DIVIDE '/'
  
 
-
-Stack<Token<bignum>> shunting_yard(vector<Token<bignum>> vect_tok)
-{
-    Stack <Token<bignum>>  operator_stack;
-    Stack <Token<bignum>>   output_stack ;
-    
-
-   	Token<bignum> top_op_stack;
-   	Token<bignum> token;
-
-
-    int n = vect_tok.size();
-
-    for(int i = 0; i < n ; i++)
-    {
-        token = vect_tok[i];
-        
-    
-        if (token.isnumber()){
-            output_stack.push(token);
-        }
-      
-
-        else if (token.isoperator()){
-            while ((!operator_stack.empty()) && (top_op_stack = operator_stack.top()).isoperator()   && (top_op_stack.getoperator() != '(' ) && (top_op_stack.getprecedence() >= token.getprecedence()))
-	            {                    
-                output_stack.push(operator_stack.pop());                
-            }
-
-            operator_stack.push(token);          
-        }
-    
-        
-        else if (token.getoperator() == '('){
-            operator_stack.push(token);
-        }
-
-
-        else if (token.getoperator() == ')'){
-            while ( (!operator_stack.empty()) && (top_op_stack = operator_stack.top()).getoperator() == '('){                      
-                output_stack.push(operator_stack.pop());
-            }
-            // If the stack runs out without finding a left parenthesis, then there are mismatched parentheses. 
-            if (operator_stack.empty()){
-                
-                cerr << "desbalanceada" << endl;//error - expresion desbalanceada
-                exit(1);
-                //salir
-            }
-            // Si llego aca es parentesis (, y lo descarto
-            operator_stack.pop();
-        }
-    }
-    
-    
-    // After while loop, if operator stack not null, pop everything to output queue 
-    while (!operator_stack.empty()){
-        // If the operator token on the top of the stack is a parenthesis, then there are mismatched parentheses.
-        if (((top_op_stack = operator_stack.top()).getoperator() == '(') ||  (top_op_stack.getoperator() == ')')){
-                cerr << "desbalanceada2" << endl;//error - expresion desbalanceada
-                exit(1);
-            //salir
-        }
-        output_stack.push(operator_stack.pop());
-    }
-    
-
-    return output_stack;
-}
-
-
-bignum calculate(Stack<Token<bignum>> * stack){
-
-    if(!stack->empty()) {
-    	Token <bignum> top_op_stack;
-    	
-
-        if((top_op_stack = stack->top()).isnumber())
-            return (stack->pop()).getdata();
-        
-
-        else if( top_op_stack.isoperator()){
-            char op = (stack->pop()).getoperator();
-
-            bignum b1 = calculate(stack);
-            bignum b2 = calculate(stack);
-
-            switch(op){
-                case ADD:
-                    return b1 + b2;
-                case SUBSTRACT:
-                    return b2 - b1;
-                case MULTIPLY:
-                    return b1 * b2;
-                //case DIVIDE:
-                  //  return b2 / b1;
-            }
-    	}
-    }
-        
-
-    
-    cerr << "pila desbalanceada no se puede calcular" << endl;
-    exit(1);         // empty - ver que hago
-    
-    
-
-}
-
-
 int
 main(int argc, char * const argv[])
 {
     
-
-
 	cmdline cmdl(options);	
 	cmdl.parse(argc, argv);
     
     // at this point the parser should've quit the program if any argument is wrong or missing
 	//Hago todos los calculos que haya en iss o me quedo esperando si es cin
-    string exp;
+    
+    bignum result, _auxres;
+    _auxres = bignum('0', 200);
+    string exp="";
 
-    while(true){
-        cin >> exp;
+    try{
+        while(1){
+        //exp.clear();
+        getline(*iss, exp, '\n');
+        //*oss << "\t \t INPUT: " << exp.length() << endl;
+        if (!exp.length()){return 0;}
+        trim(exp);
+        removeSpaces(exp);
+        //*oss << "\t \t Luego del trim : " << exp << endl;
         vector<Token<bignum>> bb; //Token<bignum> * bb=NULL;
-        parseExpression(exp, bb);   
-        for(size_t i=0; i< bb.size(); i++)
-        {
-            cout << bb[i] << endl;
-            cout << "\t is number? " << bb[i].isnumber() << endl;
-            cout << "\t is operator? " << bb[i].isoperator() << endl;
-            //cout << "\t is binary? " << bb[i].isbinary() << endl;
-            cout << "\t is bracket? " << bb[i].isbracket() << endl;
-            //if (bb[i].isoperator()){cout<<"it's an operator! --> "<< bb[i].getoperator() << endl;}
-            if (bb[i].isnumber()){cout<<"it's a number! --> "<< bb[i].getdata() << endl;}
-        }
-        cout << " ------ NOW OPERATE ------ " << endl;
+        parseExpression(exp, bb);
+        // for(long unsigned int i=0; i < bb.size() ; i++)
+            // cout << "\t token: " << bb[i]  ;
+
         Stack<Token<bignum>>  st_out = shunting_yard(bb);
-        cout << calculate(&st_out) <<endl ;
+        result = calculate(&st_out);
+        // if (result.is_negative()){
+            // if (result == _auxres){
+            // cout << "viejo:  " << result << "nuevo:  " << bignum('0') << endl;}
+            
+            // //result = bignum('+0');
+        // }
+        cout << result << endl;         
+        }
     }
-        
-	if (oss->bad()) {
-		cerr << "cannot write to output stream."
-		     << endl;
-		exit(1);
-	}
-	if (iss->bad()) {
-		cerr << "cannot read from input stream."
-		     << endl;
-		exit(1);
-	}
-	if (!iss->eof()) {
-		cerr << "cannot find EOF on input stream."
-		     << endl;
-		exit(1);
-	}
+    
+    
+    catch(int exc){
+        switch(exc){
+            case EXCEPTION_INVALID_STACK_TO_CALCULATE:
+                cerr <<  EXCEPTION_INVALID_STACK_TO_CALCULATE_MSG << endl;
+                break;
+            case EXCEPTION_MISMATCH_PARENTHESES:
+                cerr <<  EXCEPTION_MISMATCH_PARENTHESES_MSG << endl;
+               break;
+            case EXCEPTION_UNKNOWN_TOKEN:
+                cerr <<  EXCEPTION_UNKNOWN_TOKEN_MSG << endl;
+               break;
+            case EXCEPTION_UNKNOWN_PARENTHESES:
+                cerr <<  EXCEPTION_UNKNOWN_PARENTHESES_MSG << endl;
+               break;
+        }
+    } 
 
 
 

@@ -30,37 +30,8 @@ while there are tokens on the operator stack:
     pop the operator from the operator stack onto the output queue
 
 */
-#include <iostream>
-#include <string>
-#include <vector>
-#include "bignum.h"
-#include "bignum.cc"
-#include "stack.hpp"
-#include "token.cpp"
 
-
-#define ADD '+' 
-#define SUBSTRACT '-'
-#define  MULTIPLY '*'
-#define  DIVIDE '/'
-            
-#define LEFT_PARENTHESIS '('
-#define RIGHT_PARENTHESIS ')'
-
-#define EXCEPTION_INVALID_STACK_TO_CALCULATE 1
-#define EXCEPTION_INVALID_STACK_TO_CALCULATE_MSG "La pila ingresada para calcular es invalida"
-
-#define EXCEPTION_MISMATCH_PARENTHESES 2
-#define EXCEPTION_MISMATCH_PARENTHESES_MSG "Expresion con parentesis desbalanceados"
-
-#define EXCEPTION_UNKNOWN_PARENTHESES 3
-#define EXCEPTION_UNKNOWN_PARENTHESES_MSG "No se reconoce el simbolo del parentesis"
-
-#define EXCEPTION_UNKNOWN_TOKEN 4
-#define EXCEPTION_UNKNOWN_TOKEN_MSG "No se reconoce el tipo del Token"
-
-
-
+#include "shunting_yard.h"
 
 
 Stack<Token<bignum>> shunting_yard(vector<Token<bignum>> vect_tok)
@@ -73,17 +44,15 @@ Stack<Token<bignum>> shunting_yard(vector<Token<bignum>> vect_tok)
    	Token<bignum> token;
 
 
-    int n = vect_tok.size();
+    size_t n = vect_tok.size();
 
-    for(int i = 0; i < n ; i++)
+    for(size_t i = 0; i < n ; i++)
     {
         token = vect_tok[i];
         
-    
         if (token.isnumber()){
             output_stack.push(token);
         }
-      
 
         else if (token.isoperator()){
             while ((!operator_stack.empty()) && (top_op_stack = operator_stack.top()).isoperator()   && (top_op_stack.getoperator() != LEFT_PARENTHESIS ) && (top_op_stack.getprecedence() >= token.getprecedence()))
@@ -93,14 +62,12 @@ Stack<Token<bignum>> shunting_yard(vector<Token<bignum>> vect_tok)
 
             operator_stack.push(token);          
         }
-    
         
         else if (token.isbracket()){
             if (token.getbracket() == LEFT_PARENTHESIS){
                 operator_stack.push(token);
             }
 
-        
             else if (token.getbracket() == RIGHT_PARENTHESIS){
                 while ( (!operator_stack.empty()) && (top_op_stack = operator_stack.top()).getbracket() != LEFT_PARENTHESIS){                      
                     output_stack.push(operator_stack.pop());
@@ -128,7 +95,6 @@ Stack<Token<bignum>> shunting_yard(vector<Token<bignum>> vect_tok)
         }
         output_stack.push(operator_stack.pop());
     }
-    
 
     return output_stack;
 }
@@ -139,7 +105,7 @@ bignum calculate(Stack<Token<bignum>> * stack){
     if(!stack->empty()) {
     	Token <bignum> top_stack;
     	
-        //Caso Limite: Devielve numero
+        //Caso Limite: Devuelve numero
         if((top_stack = stack->top()).isnumber())
             return (stack->pop()).getdata();
         
@@ -147,7 +113,7 @@ bignum calculate(Stack<Token<bignum>> * stack){
         else if( top_stack.isoperator()){
             char op = (stack->pop()).getoperator();
 
-            //Llamados recursivos hasta encontrar numeros 2 numeros
+            //Llamados recursivos hasta encontrar 2 numeros
             bignum b1 = calculate(stack);
             bignum b2 = calculate(stack);
 
@@ -167,7 +133,7 @@ bignum calculate(Stack<Token<bignum>> * stack){
     throw(EXCEPTION_INVALID_STACK_TO_CALCULATE);
 }
 
-
+/*
 int main()
 {
 
@@ -178,7 +144,7 @@ int main()
         cin >> exp;
         vector<Token<bignum>> bb; //Token<bignum> * bb=NULL;
         parseExpression(exp, bb);
-        for(int i=0; i < bb.size() ; i++)
+        for(long unsigned int i=0; i < bb.size() ; i++)
             cout << "token:" << bb[i] <<"-" ;
 
         Stack<Token<bignum>>  st_out = shunting_yard(bb);
@@ -207,4 +173,4 @@ int main()
     
 
 	return 0;
-}
+}*/
