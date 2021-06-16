@@ -15,8 +15,11 @@
 #include "karatsuba.h"
 #include "standard_multiply.h"
 
-
 using namespace std;
+
+#define	STANDARD_MULTIPLIER "standard"
+#define	KARATSUBA_MULTIPLIER "karatsuba"
+
 
 struct Symbols {
     string operators = "*/+-";
@@ -27,7 +30,7 @@ struct Symbols {
 
 static void opt_input(string const &);
 static void opt_output(string const &);
-static void opt_precision(string const &);
+static void opt_multiplier(string const &);
 static void opt_help(string const &);
 
 
@@ -35,19 +38,53 @@ static void opt_help(string const &);
 static option_t options[] = {
 	{1, "i", "input", "-", opt_input, OPT_DEFAULT},
 	{1, "o", "output", "-", opt_output, OPT_DEFAULT},
-	{1, "p", "precision", PRECISION_DEFAULT_, opt_precision, OPT_DEFAULT},
+	{1, "m", "multiplier", KARATSUBA_MULTIPLIER , opt_multiplier, OPT_DEFAULT},
 	{0, "h", "help", NULL, opt_help, OPT_DEFAULT},
 	{0, },
 };
 
-static int precision;
+//static int precision;
 static istream *iss = 0;	// Input Stream (clase para manejo de los flujos de entrada)
 static ostream *oss = 0;	// Output Stream (clase para manejo de los flujos de salida)
 static fstream ifs; 		// Input File Stream (derivada de la clase ifstream que deriva de istream para el manejo de archivos)
 static fstream ofs;		// Output File Stream (derivada de la clase ofstream que deriva de ostream para el manejo de archivos)
 
+static Strategy * mult_algorithm = 0;
+
+/*
+class Strategy{
+	public:
+		virtual ~Strategy(){};
+		virtual int meth()=0;
+};
+class Standard_multiply: public Strategy
+{
+	public:
+		//virtual ~Strategy1(){};
+		virtual int meth(){
+			cout << "esto es Standard"<<endl;
+			return 1;
+
+	}
+};
+class Karatsuba_multiply: public Strategy
+{	
+	public:
+		//virtual ~Strategy2(){};
+		virtual int meth(){
+			cout << "esto es Karatsuba"<<endl;
+			return 2;
+	}
+};
+*/
+
+
+
+
 
 /*****************************************************/
+
+
 static void
 opt_input(string const &arg)
 {
@@ -101,56 +138,43 @@ opt_output(string const &arg)
 	}
 }
 
+
 static void
-opt_precision(string const &arg)
+opt_multiplier(string const &arg)
 {
-	istringstream iss(arg);
-
-	// Intentamos extraer el factor de la línea de comandos.
-	// Para detectar argumentos que únicamente consistan de
-	// números enteros, vamos a verificar que EOF llegue justo
-	// después de la lectura exitosa del escalar.
-
-	if (!(iss >> precision) || !iss.eof()) {
-		cerr << "non-integer precision: "
-		     << arg
-		     << "."
-		     << endl;
+	if(arg == STANDARD_MULTIPLIER){
+		mult_algorithm = new Standard_multiply;
+	}
+	else if(arg == KARATSUBA_MULTIPLIER ){
+		mult_algorithm = new Karatsuba_multiply;
+	}
+	else{
+		cerr << "Invalid Mulplier argument " << endl;
 		exit(1);
 	}
-    
-    if (precision <= 0){
-        cerr << "non-positive precision: "
-            << arg
-            << "."
-            << endl;
-        exit(1);
-    }
-    
-	if (iss.bad()) {
-		cerr << "cannot read integer precision."
-		     << endl;
-		exit(1);
-	}
+
 }
+
+
+
 
 static void
 opt_help(string const &arg)
 {	
-	cout << "FIUBA - 95.12 Algoritmos y Programación II - 2021 C1 - Grupo C - Anus, Aupi, Boudjikanian - TP0"
+	cout << "FIUBA - 95.12 Algoritmos y Programación II - 2021 C1 - Grupo C - Anus, Aupi, Boudjikanian - TP1"
 		 << endl
 	     << endl;
 	cout << "Program help"
 	     << endl;
 	cout << "cmdline options: "
 		 << endl
-		 << "[-p precision] define precision used by program (number of digits use to represent the number), default is " << BIGNUM_PRECISION_DEFAULT 
+		 << "[-m --multiplier] define the algorithm to multiply, default is " << KARATSUBA_MULTIPLIER 
 		 << endl
-		 << "[-i file] define input file, by default stdin"
+		 << "[-i --input ] define input file, by default stdin"
 		 << endl
-		 << "[-o file] define output file, by default stdout"
+		 << "[-o --output] define output file, by default stdout"
 	     << endl
-		 << "[-h] prints a basic help"
+		 << "[-h --help] prints a basic help"
 	     << endl;
 	cout << endl
 	     << "Developed by marto-chiqui-panter"
@@ -195,10 +219,8 @@ void removeSpaces(std::string & str)
         // cout << str << endl;
         // cout << aux << endl;
     }
+    
 }
-
-
-
 
 
 int
@@ -207,40 +229,32 @@ main(int argc, char * const argv[])
     
 	cmdline cmdl(options);	
 	cmdl.parse(argc, argv);
-    
+
     // at this point the parser should've quit the program if any argument is wrong or missing
 	//Hago todos los calculos que haya en iss o me quedo esperando si es cin
     
-    bignum result, _auxres;
-    //_auxres = bignum("0");
-    string exp="5*(1*2)";
-    
-    // Strategy * multiplier = new Karatsuba_multiply;
-    Strategy * multiplier = new Standard_multiply;
-    
+    string exp="";
+
     try{
-        while(1){
-        //exp.clear();
-        //getline(*iss, exp, '\n');
-        //*oss << "\t \t INPUT: " << exp.length() << endl;
+        while(getline(*iss, exp, '\n')){
+    
+  
+    
         if (!exp.length()){return 0;}
         trim(exp);
         removeSpaces(exp);
-        // *oss << "\t input luego del trim : " << exp << endl;
+        
         vector<Token<bignum>> bb; //Token<bignum> * bb=NULL;
-        parseExpression(exp, bb, multiplier);
-        // for(long unsigned int i=0; i < bb.size() ; i++)
-        // {
-            // cout << "\t token: " << bb[i] << endl;
-            // // cout << "is number?  " << bb[i].isnumber() << endl;
-        // }
-
+        parseExpression(exp, bb, mult_algorithm);
+       
         Stack<Token<bignum>> st_out = shunting_yard(bb);
-        // while(!st_out.empty()){
-            // cout << st_out.pop() << endl;
-        // }
-        cout << calculate(&st_out) << endl;         
+        //while(!st_out.empty()){
+        //	cout << st_out.pop() << endl;
+        //}
+
+        *oss << calculate(&st_out) << endl;         
         }
+        delete  mult_algorithm; 	
     }
     
     

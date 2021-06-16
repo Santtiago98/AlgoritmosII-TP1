@@ -570,13 +570,13 @@ multiply(a[1..p], b[1..q], base)                            // Operands containi
 const bignum operator*(const bignum& b1, const bignum& b2){
 	
     bignum b3;
-    b3.strategy_ptr = b1.strategy_ptr;
-    if (!b3.strategy_ptr){
+    
+    if (!b1.strategy_ptr){
        return b3;
        }
+       
     b3 = (b1.strategy_ptr)->multiply_strat(b1,b2);
-    // return b3;
-    
+    b3.strategy_ptr = b1.strategy_ptr;
 	return b3;
 }
 
