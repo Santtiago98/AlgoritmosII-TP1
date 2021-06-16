@@ -12,19 +12,14 @@ const bignum Standard_multiply::multiply_strat(const bignum& b1, const bignum& b
     
 	if( (b1.digits == NULL) || (b2.digits == NULL) ){
 		return b3;
-		
 	}
 	
 	if( (b1==b_0) || (b2==b_0) ){
-		
 		return b_0;
-		
 	}
 	
-	//cout << "debug print, digitos pedidos = " << b1.bn_length + b2.bn_length + 1 << endl;
 	unsigned long aux_length = b1.bn_length + b2.bn_length + 1;
 	unsigned short* aux_digits = new unsigned short[ aux_length ];
-	
 	
 	for( unsigned long i = 0 ; i < aux_length ; i++ ){
 		
@@ -63,31 +58,23 @@ const bignum Standard_multiply::multiply_strat(const bignum& b1, const bignum& b
 		}
 		
 	}
-	
-	//delete [] b3.digits;
+
 	b3.digits = new unsigned short[b3.bn_length];
 	
 	for( unsigned long i=0 ; i < b3.bn_length ; i++){
-	
-		b3.digits[i] = aux_digits[i];
-		
+		b3.digits[i] = aux_digits[i];	
 	}
 	
 	if( ( b1.negative && !b2.negative) || (!b1.negative && b2.negative) ){
-		
 		b3.negative = true;
-		
 	}
 	else{
-		
 		b3.negative = false;
-		
 	}
 	
 	delete[] aux_digits;
 	aux_digits = NULL;
 	
-	//cout << "="<<b3;
 	return b3;
 	
 }

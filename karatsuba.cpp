@@ -16,7 +16,7 @@ const bignum Karatsuba_multiply::bn_last_digits(const bignum & b1, unsigned long
 	for( unsigned long int i=0 ; i < n ; i++ ){
 		b.digits[i] = b1.digits[b1.bn_length - n + i];
 	}
-	//cout << "ld->in="<<b1<<"n->"<<n<<"->out="<<b;
+
 	return b;
 	
 }
@@ -24,15 +24,10 @@ const bignum Karatsuba_multiply::bn_last_digits(const bignum & b1, unsigned long
 const bignum Karatsuba_multiply::bn_first_digits(const bignum & b1, unsigned long n){
 	
 	bignum b;
+	b.strategy_ptr = b1.strategy_ptr;
 	
 	if( (b1.digits == NULL) | ( n > b1.bn_length ) ){
-		
-		// delete[] b3.digits;
-		// b3.digits = NULL;
-		// b3.bn_length = 0;
-		// b3.negative = false;
 		return b;
-		
 	}
 	
 	b.bn_length = n;
@@ -40,11 +35,9 @@ const bignum Karatsuba_multiply::bn_first_digits(const bignum & b1, unsigned lon
 	b.negative = b1.negative;
 	
 	for( unsigned long i=0 ; i < n ; i++ ){
-		
 		b.digits[i] = b1.digits[i];
-		
 	}
-	//cout << "fd->in="<<b1<<"n->"<<n<<"->out="<<b;
+
 	return b;
 	
 }
@@ -58,7 +51,7 @@ const bignum Karatsuba_multiply::bn_mult_pow10(const bignum & b1, unsigned long 
         return b;
 	}
 	
-	b.bn_length = b1.bn_length + n; // se le agregan n 0 atras
+	b.bn_length = b1.bn_length + n; // se le agregan n 0s atras
 	b.digits = new unsigned short[b.bn_length];
 	b.negative = b1.negative;
 	
@@ -69,7 +62,8 @@ const bignum Karatsuba_multiply::bn_mult_pow10(const bignum & b1, unsigned long 
 	for( unsigned long int i=0 ; i < b1.bn_length ; i++ ){
 		b.digits[n + i] = b1.digits[i];
 	}
-	//cout << "pow10->in="<<b1<<"n->"<<n<<"->out="<<b;
+	
+	
 	return b;
 	
 }
@@ -93,18 +87,14 @@ const bignum Karatsuba_multiply::_bn_mult_kara_base_(const bignum& b1, const big
 		
 	}
 	
-	//cout << "debug print, digitos pedidos = " << b1.bn_length + b2.bn_length + 1 << endl;
 	unsigned long aux_length = b1.bn_length + b2.bn_length + 1;
 	unsigned short* aux_digits = new unsigned short[ aux_length ];
-	
 	
 	for( unsigned long i = 0 ; i < aux_length ; i++ ){
 		
 		aux_digits[i] = 0;
 		
 	}
-	
-	// El producto b1[1..p] y b2[1..q] tiene largo p+q[-1] dependiendo del carry final
 	
 	for(unsigned long i = 0; i < b2.bn_length ; i++){
 		
@@ -135,8 +125,7 @@ const bignum Karatsuba_multiply::_bn_mult_kara_base_(const bignum& b1, const big
 		}
 		
 	}
-	
-	//delete [] b3.digits;
+
 	b3.digits = new unsigned short[b3.bn_length];
 	
 	for( unsigned long i=0 ; i < b3.bn_length ; i++){
@@ -158,8 +147,7 @@ const bignum Karatsuba_multiply::_bn_mult_kara_base_(const bignum& b1, const big
 	
 	delete[] aux_digits;
 	aux_digits = NULL;
-	
-   
+ 
 	return b3;
 	
 }
@@ -173,9 +161,7 @@ const bignum Karatsuba_multiply::multiply_strat(const bignum& a_, const bignum& 
     result.strategy_ptr = a_.strategy_ptr;
 	bignum zero = 0;
     zero.strategy_ptr = a_.strategy_ptr;
-    
-	//std::cout << "Se usa karatsuba!" << std::endl;
-    
+        
 	if( (a_.digits == NULL) || (b_.digits == NULL) ){
 		return result;
 	}

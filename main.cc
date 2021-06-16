@@ -51,36 +51,6 @@ static fstream ofs;		// Output File Stream (derivada de la clase ofstream que de
 
 static Strategy * mult_algorithm = 0;
 
-/*
-class Strategy{
-	public:
-		virtual ~Strategy(){};
-		virtual int meth()=0;
-};
-class Standard_multiply: public Strategy
-{
-	public:
-		//virtual ~Strategy1(){};
-		virtual int meth(){
-			cout << "esto es Standard"<<endl;
-			return 1;
-
-	}
-};
-class Karatsuba_multiply: public Strategy
-{	
-	public:
-		//virtual ~Strategy2(){};
-		virtual int meth(){
-			cout << "esto es Karatsuba"<<endl;
-			return 2;
-	}
-};
-*/
-
-
-
-
 
 /*****************************************************/
 
@@ -154,8 +124,6 @@ opt_multiplier(string const &arg)
 	}
 
 }
-
-
 
 
 static void

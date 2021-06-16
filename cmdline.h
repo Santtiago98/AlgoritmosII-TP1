@@ -8,8 +8,6 @@
 #define OPT_SEEN      1
 #define OPT_MANDATORY 2
 
-
-
 struct option_t {
 	int has_arg;
 	const char *short_name;

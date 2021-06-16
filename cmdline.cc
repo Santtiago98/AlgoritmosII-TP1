@@ -214,4 +214,5 @@ cmdline::do_short_opt(const char *opt, const char *arg)
 	exit(1);
 
 	return -1;
+	
 }

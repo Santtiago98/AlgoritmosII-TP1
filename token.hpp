@@ -43,7 +43,7 @@
 template <class T>
 class Token{
     private:
-        bool _isnumber, _isoperator, _isbracket, _isbinary;
+        bool _isnumber, _isoperator, _isparenthesis, _isbinary;
         char _symbol='\0';
         unsigned int _precedence=0;
         T data;
@@ -52,7 +52,7 @@ class Token{
         const bool isnumber() const;
         const bool isoperator() const;
         const bool isbinary() const;
-        const bool isbracket() const;
+        const bool isparenthesis() const;
         
         // CONSTRUCTORES
         Token();
@@ -63,7 +63,7 @@ class Token{
         // GETTERS
         T getdata() const;
         char getoperator() const;
-        char getbracket() const;
+        char getparenthesis() const;
         unsigned int getprecedence() const;
         
         // Asignaciones
@@ -92,10 +92,9 @@ const bool Token<T>::isbinary() const{
     }
     
 template <class T>
-const bool Token<T>::isbracket() const{
-    return _isbracket == true? true: false;
+const bool Token<T>::isparenthesis() const{
+    return _isparenthesis == true? true: false;
     }
-
 
 
 /* ---- GETTERS ---- */
@@ -111,7 +110,7 @@ char Token<T>::getoperator() const{// No se debe usar sin verificar que sea un o
 }
 
 template <class T>
-char Token<T>::getbracket() const{// No se debe usar sin verificar que sea un bracket
+char Token<T>::getparenthesis() const{// No se debe usar sin verificar que sea un parenthesis
     return this->_symbol;
 }
 
@@ -125,7 +124,7 @@ template <class T>
 Token<T>::Token(){
     _isnumber = true;
     _isoperator = false;
-    _isbracket = false;
+    _isparenthesis = false;
     _isbinary = false;
     _precedence = 0;
     _symbol = '\0';
@@ -136,7 +135,7 @@ template <class T>
 Token<T>::Token(const T token_){
     _isnumber = true;
     _isoperator = false;
-    _isbracket = false;
+    _isparenthesis = false;
     _isbinary = false;
     _precedence = 0;
     _symbol = '\0';
@@ -157,21 +156,21 @@ Token<T>::Token(const std::string str, Strategy * str_ptr){
                 _precedence = 3;
                 _isoperator = true;
                 _isbinary = true;  
-                _isbracket = false;                
+                _isparenthesis = false;                
                 break;
             case '+':
             case '-':
                 _precedence = 2;
                 _isoperator = true;
                 _isbinary = true;
-                _isbracket = false;
+                _isparenthesis = false;
                 break;
             case '(':
             case ')':
                 _precedence = 0;
                 _isoperator = false;
                 _isbinary = false;
-                _isbracket = true;
+                _isparenthesis = true;
                 break;
                 
         }
@@ -183,7 +182,7 @@ Token<T>::Token(const std::string str, Strategy * str_ptr){
         // el signo es un '+' o '-' y hay numeros
         _isoperator = false;
         _isnumber = true; 
-        _isbracket = false;
+        _isparenthesis = false;
         _precedence = 0;
         _isbinary = false;
         _symbol = '\0'; // plancho un \0 pues no es utilizado
@@ -197,7 +196,7 @@ template <class T>
 Token<T>::~Token(){
     _isnumber = false;
     _isoperator = false;
-    _isbracket = false;
+    _isparenthesis = false;
     _isbinary = false;
     _precedence = 0;
     _symbol = '\0';
@@ -211,7 +210,7 @@ const Token<T> & Token<T>::operator=(const Token<T> & b){
 	}
     _isnumber = b._isnumber;
     _isoperator = b._isoperator;
-    _isbracket = b._isbracket;
+    _isparenthesis = b._isparenthesis;
     _isbinary = b._isbinary;
     _precedence = b._precedence;
     _symbol = b._symbol;
@@ -256,13 +255,11 @@ void parseExpression(const std::string exp, std::vector<T> &b, Strategy * str_pt
     if (L==0){
         std::cout << "No expression to parse. Length = 0" << std::endl;
     }
-    // std::cout << "L= " << L <<std::endl;
-    // std::cout << "exp:  " << exp << std::endl;
-       
+
+    
     while (iter < L){
         aux = exp.find_first_of("*/+-()"/*simbols_1.parenthesis + simbols_1.operators*/, iter);
         if (aux==std::string::npos){
-            // std::cout << "iter: " <<iter<<"\t"<<"token: "<<b[iter].isnumber()<<std::endl;
             // por si los ultimos caracteres son numeros
             fp = T(exp.substr(iter, L-iter), str_ptr);
             b.push_back(fp);
@@ -351,13 +348,13 @@ void parseExpression(const std::string exp, std::vector<T> &b, Strategy * str_pt
     
     // itero todo el vector para corregir errores de parentesis 
     for (size_t j=1; j < b.size()-1; j++){ 
-        if (b[j].isbracket()){
-            if (b[j].getbracket() == LEFT_PARENTHESIS && b[j-1].isnumber()){
-                // std::cout << "Mala expresion." << std::endl;
+        if (b[j].isparenthesis()){
+            if (b[j].getparenthesis() == LEFT_PARENTHESIS && b[j-1].isnumber()){
+
                 throw(WRONG_EXPRESION_MISSING_OPERAND_BEFORE_PARENTHESIS);
             }    
-            if (b[j].getbracket() == RIGHT_PARENTHESIS && b[j+1].isnumber()){
-                // std::cout << "Mala expresion." << std::endl;
+            if (b[j].getparenthesis() == RIGHT_PARENTHESIS && b[j+1].isnumber()){
+
                 throw(WRONG_EXPRESION_MISSING_OPERAND_AFTER_PARENTHESIS);
             }
         }
@@ -365,14 +362,14 @@ void parseExpression(const std::string exp, std::vector<T> &b, Strategy * str_pt
             switch (b[j].getoperator()){
                 case '*':
                 case '/':
-                    if (b[j-1].getbracket() == LEFT_PARENTHESIS || b[j+1].getbracket() == RIGHT_PARENTHESIS) {
-                        // std::cout << "Mala expresion." << std::endl;
+                    if (b[j-1].getparenthesis() == LEFT_PARENTHESIS || b[j+1].getparenthesis() == RIGHT_PARENTHESIS) {
+
                         throw(WRONG_MULTIPLY_DIVIDE_PARENTHESIS_COMBINATION);
                     } 
                     break;
                 case '+':
                 case '-':
-                    if (b[j-1].getbracket() == LEFT_PARENTHESIS ||b[j-1].getbracket() == '*' || b[j-1].getbracket() == '-' ){ // parentesis u *, / 
+                    if (b[j-1].getparenthesis() == LEFT_PARENTHESIS ||b[j-1].getparenthesis() == '*' || b[j-1].getparenthesis() == '-' ){ // parentesis u *, / 
                         if(b[j+1].isnumber()){
                             if (b[j].getoperator() == '-'){
                                 b[j+1] = T(-b[j+1].getdata()); //le cambio el signo 

@@ -18,16 +18,16 @@
 #define RIGHT_PARENTHESIS ')'
 
 #define EXCEPTION_INVALID_STACK_TO_CALCULATE 1
-#define EXCEPTION_INVALID_STACK_TO_CALCULATE_MSG "La pila ingresada para calcular es invalida"
+#define EXCEPTION_INVALID_STACK_TO_CALCULATE_MSG "Input stack is invalid"
 
 #define EXCEPTION_MISMATCH_PARENTHESES 2
-#define EXCEPTION_MISMATCH_PARENTHESES_MSG "Expresion con parentesis desbalanceados"
+#define EXCEPTION_MISMATCH_PARENTHESES_MSG "Unbalanced expression"
 
 #define EXCEPTION_UNKNOWN_PARENTHESES 3
-#define EXCEPTION_UNKNOWN_PARENTHESES_MSG "No se reconoce el simbolo del parentesis"
+#define EXCEPTION_UNKNOWN_PARENTHESES_MSG "The parenthesis symbol is not recognized, neither '(' nor ')'"
 
 #define EXCEPTION_UNKNOWN_TOKEN 4
-#define EXCEPTION_UNKNOWN_TOKEN_MSG "No se reconoce el tipo del Token"
+#define EXCEPTION_UNKNOWN_TOKEN_MSG "Token is not recognized"
 
 
 
