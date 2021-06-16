@@ -13,7 +13,7 @@
 #define SUBSTRACT '-'
 #define  MULTIPLY '*'
 #define  DIVIDE '/'
-            
+
 #define LEFT_PARENTHESIS '('
 #define RIGHT_PARENTHESIS ')'
 

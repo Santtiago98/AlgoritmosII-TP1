@@ -19,9 +19,21 @@
 #include "bignum.h"
 #endif
 
-#ifndef DEFAULT_SIZE
-#define DEFAULT_SIZE  10
-#endif
+
+#define WRONG_EXPRESION_MISSING_OPERAND_BEFORE_PARENTHESIS 10
+#define WRONG_EXPRESION_MISSING_OPERAND_BEFORE_PARENTHESIS_MSG "Missing operand before a left parentesis"
+
+#define WRONG_EXPRESION_MISSING_OPERAND_AFTER_PARENTHESIS 11
+#define WRONG_EXPRESION_MISSING_OPERAND_AFTER_PARENTHESIS_MSG "Missing operand after a right parentesis"
+
+#define CONSECUTIVES_OPERATORS_MULTIPLY_DIVIDE 12
+#define CONSECUTIVES_OPERATORS_MULTIPLY_DIVIDE_MSG "Two consecutives multiply or divide operators"
+
+#define CONSECUTIVES_OPERATORS_SUM_MINUS_WITHOUT_NUMBER 13
+#define CONSECUTIVES_OPERATORS_SUM_MINUS_WITHOUT_NUMBER_MSG "Two + or - operators no follow by a number"
+
+#define WRONG_MULTIPLY_DIVIDE_PARENTHESIS_COMBINATION 14
+#define WRONG_MULTIPLY_DIVIDE_PARENTHESIS_COMBINATION_MSG "Incorrect order of multiply and divide operators with parenthesis"
 
 
 //using namespace std;
@@ -34,9 +46,9 @@ class Token{
         bool _isnumber, _isoperator, _isbracket, _isbinary;
         char _symbol='\0';
         unsigned int _precedence=0;
-        
-    public:
         T data;
+    public:
+        
         const bool isnumber() const;
         const bool isoperator() const;
         const bool isbinary() const;
@@ -81,7 +93,6 @@ const bool Token<T>::isbinary() const{
     
 template <class T>
 const bool Token<T>::isbracket() const{
-    //std::cout << "isbracket() called " ;
     return _isbracket == true? true: false;
     }
 
@@ -101,7 +112,6 @@ char Token<T>::getoperator() const{// No se debe usar sin verificar que sea un o
 
 template <class T>
 char Token<T>::getbracket() const{// No se debe usar sin verificar que sea un bracket
-    //std::cout << "getbracket called()" << endl;
     return this->_symbol;
 }
 
@@ -224,36 +234,6 @@ std::ostream& operator << (std::ostream& os, const Token<T>& b){
     return os;
 }
 
-// ---------------------------------------------------------------------------------------
-/// ---------TOKENIZE------------
-/*template <class T>
-class Tokens{
-        
-    private:
-        Token<T> tokens[DEFAULT_SIZE];
-        
-        
-    public:
-        unsigned int length;
-        
-        // --- METODOS --- //
-        Token<T> pop();
-        
-        // --- CONSTRUCTORES --- //
-        Tokens():length(0){};
-        Tokens(std::string str);
-
-};
-
-template <class T>
-Tokens<T>::Tokens(std::string exp){
-    
-    if (!exp.length()) {
-        std::cout << "Longitud nula" << endl;
-    }
-    tokens[0] = Token<T>(exp);
-    std::cout << "HOLA" << endl;
-}*/
 
 // ---------------------------------------------------------------------------------------
 template <class T> 
@@ -276,11 +256,13 @@ void parseExpression(const std::string exp, std::vector<T> &b, Strategy * str_pt
     if (L==0){
         std::cout << "No expression to parse. Length = 0" << std::endl;
     }
-    
+    // std::cout << "L= " << L <<std::endl;
+    // std::cout << "exp:  " << exp << std::endl;
        
     while (iter < L){
         aux = exp.find_first_of("*/+-()"/*simbols_1.parenthesis + simbols_1.operators*/, iter);
         if (aux==std::string::npos){
+            // std::cout << "iter: " <<iter<<"\t"<<"token: "<<b[iter].isnumber()<<std::endl;
             // por si los ultimos caracteres son numeros
             fp = T(exp.substr(iter, L-iter), str_ptr);
             b.push_back(fp);
@@ -291,19 +273,18 @@ void parseExpression(const std::string exp, std::vector<T> &b, Strategy * str_pt
             case '*':
             case '/':
                 if (exp[aux+1] == '*' || exp[aux+1] == '/' || exp[0]=='*' || exp[0]=='/'){
-                    std::cout << "Mala expresion2." << std::endl;
-                    exit(1);
-                    break;
+                    throw(CONSECUTIVES_OPERATORS_MULTIPLY_DIVIDE);
                 }
+                //break;
             case '+':
             case '-':
+                if (exp[aux]=='+' || exp[aux]=='-'){
                 if ((aux2 = exp.find_first_of("+-", aux+1)) == (aux+1)){
                     // hay dos signos + - juntos
                     // debo verificar que luego haya algun numero 
                     if((aux3 = exp.find_first_of("0123456789", aux2+1)) != aux2+1){
                         // hay 2 caracteres +,- juntos no seguidos por un numero
-                        std::cout << "Mala expresion1." << std::endl;
-                        exit(1);    
+                        throw(CONSECUTIVES_OPERATORS_SUM_MINUS_WITHOUT_NUMBER);    
                         break;
 
                     }
@@ -330,8 +311,9 @@ void parseExpression(const std::string exp, std::vector<T> &b, Strategy * str_pt
                         }                            
                     }  
                 }
-                
+                }
             default:
+                //default:
                 // genero el token y lo agrego
                 // creo el numero si corresponde, o sea aux > iter
                 if(aux!=iter) {
@@ -342,8 +324,10 @@ void parseExpression(const std::string exp, std::vector<T> &b, Strategy * str_pt
                 fp = T(exp.substr(aux,1),str_ptr);
                 b.push_back(fp);   
                 
-                iter = aux+1;
+                iter = aux+1;            
+
         }
+
   
     }
     // ahora verifco que el primer token no sea un signo de un numero
@@ -369,12 +353,12 @@ void parseExpression(const std::string exp, std::vector<T> &b, Strategy * str_pt
     for (size_t j=1; j < b.size()-1; j++){ 
         if (b[j].isbracket()){
             if (b[j].getbracket() == LEFT_PARENTHESIS && b[j-1].isnumber()){
-                std::cout << "Mala expresion." << std::endl;
-                exit(1);
+                // std::cout << "Mala expresion." << std::endl;
+                throw(WRONG_EXPRESION_MISSING_OPERAND_BEFORE_PARENTHESIS);
             }    
             if (b[j].getbracket() == RIGHT_PARENTHESIS && b[j+1].isnumber()){
-                std::cout << "Mala expresion." << std::endl;
-                exit(1);
+                // std::cout << "Mala expresion." << std::endl;
+                throw(WRONG_EXPRESION_MISSING_OPERAND_AFTER_PARENTHESIS);
             }
         }
         if (b[j].isoperator()){
@@ -382,13 +366,13 @@ void parseExpression(const std::string exp, std::vector<T> &b, Strategy * str_pt
                 case '*':
                 case '/':
                     if (b[j-1].getbracket() == LEFT_PARENTHESIS || b[j+1].getbracket() == RIGHT_PARENTHESIS) {
-                        std::cout << "Mala expresion." << std::endl;
-                        exit(1);
+                        // std::cout << "Mala expresion." << std::endl;
+                        throw(WRONG_MULTIPLY_DIVIDE_PARENTHESIS_COMBINATION);
                     } 
                     break;
                 case '+':
                 case '-':
-                    if (b[j-1].getbracket() == LEFT_PARENTHESIS){ // parentesis u *, / 
+                    if (b[j-1].getbracket() == LEFT_PARENTHESIS ||b[j-1].getbracket() == '*' || b[j-1].getbracket() == '-' ){ // parentesis u *, / 
                         if(b[j+1].isnumber()){
                             if (b[j].getoperator() == '-'){
                                 b[j+1] = T(-b[j+1].getdata()); //le cambio el signo 
@@ -402,42 +386,11 @@ void parseExpression(const std::string exp, std::vector<T> &b, Strategy * str_pt
             }
         }
     }
-    
-
+        //uncoment for easy debbug :D 
+    // for(size_t i=0; i< b.size();i++){
+        // if(b[i].isnumber())
+        // std::cout << b[i].getdata() << std::endl;
+    // }
 }
-
-
-/*
-int main(){ // script para testear el funcionamiento 
-    std::string exp;
-    
-    //Token<bignum> tok1("-69");
-    //std::cout << tok1;
-    
-    vector<Token<bignum>> bb;
-    bb.push_back(Token<bignum>("35"));
-    bb.push_back(Token<bignum>("*"));
-    std::cout << bb[0] << endl;
-    std::cout << bb[1] << endl;
-    
-    
-    while(true){
-        cin >> exp;
-        vector<Token<bignum>> bb; //Token<bignum> * bb=NULL;
-        parseExpression(exp, bb);   
-        for(size_t i=0; i< bb.size(); i++)
-        {
-        std::cout << bb[i] << endl;
-        std::cout << "\t is number? " << bb[i].isnumber() << endl;
-        std::cout << "\t is operator? " << bb[i].isoperator() << endl;
-        std::cout << "\t precedence? " << bb[i].getprecedence() << endl;
-        std::cout << "\t is bracket? " << bb[i].isbracket() << endl;
-        if (bb[i].isoperator()){std::cout<<"it's an operator! --> "<< bb[i].getoperator() << endl;}
-        if (bb[i].isnumber()){std::cout<<"it's a number! --> "<< bb[i].getnumber() << endl;}
-        if (bb[i].isbracket()){std::cout<<"it's a bracket! --> "<< bb[i].getbracket() << endl;}
-        }
-        //delete [] bb;
-    }
-}*/
 
 #endif

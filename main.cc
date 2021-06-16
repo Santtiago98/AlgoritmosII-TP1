@@ -21,12 +21,12 @@ using namespace std;
 #define	KARATSUBA_MULTIPLIER "karatsuba"
 
 
-struct Symbols {
-    string operators = "*/+-";
-    string parenthesis = "()";
-    int precedence[4] = {3,3,2,2};
-    string digits = "0123456789";
-} simbols;
+// struct Symbols {
+    // string operators = "*/+-";
+    // string parenthesis = "()";
+    // int precedence[4] = {3,3,2,2};
+    // string digits = "0123456789";
+// } simbols;
 
 static void opt_input(string const &);
 static void opt_output(string const &);
@@ -216,8 +216,6 @@ void removeSpaces(std::string & str)
     size_t aux=0;
     while((aux=str.find_first_of('\t')) != string::npos){
         str.erase(aux, 1);
-        // cout << str << endl;
-        // cout << aux << endl;
     }
     
 }
@@ -233,12 +231,11 @@ main(int argc, char * const argv[])
     // at this point the parser should've quit the program if any argument is wrong or missing
 	//Hago todos los calculos que haya en iss o me quedo esperando si es cin
     
-    string exp="";
+    string exp="12*-1234";
 
     try{
         while(getline(*iss, exp, '\n')){
-    
-  
+        // while(1){
     
         if (!exp.length()){return 0;}
         trim(exp);
@@ -246,19 +243,16 @@ main(int argc, char * const argv[])
         
         vector<Token<bignum>> bb; //Token<bignum> * bb=NULL;
         parseExpression(exp, bb, mult_algorithm);
-       
+        
         Stack<Token<bignum>> st_out = shunting_yard(bb);
-        //while(!st_out.empty()){
-        //	cout << st_out.pop() << endl;
-        //}
-
         *oss << calculate(&st_out) << endl;         
         }
-        delete  mult_algorithm; 	
+        delete  mult_algorithm; 
     }
     
     
     catch(int exc){
+        delete  mult_algorithm; 
         switch(exc){
             case EXCEPTION_INVALID_STACK_TO_CALCULATE:
                 cerr <<  EXCEPTION_INVALID_STACK_TO_CALCULATE_MSG << endl;
@@ -272,7 +266,22 @@ main(int argc, char * const argv[])
             case EXCEPTION_UNKNOWN_PARENTHESES:
                 cerr <<  EXCEPTION_UNKNOWN_PARENTHESES_MSG << endl;
                break;
-        }
+            case WRONG_EXPRESION_MISSING_OPERAND_BEFORE_PARENTHESIS:
+                cerr << WRONG_EXPRESION_MISSING_OPERAND_BEFORE_PARENTHESIS_MSG <<endl;
+                break;
+            case WRONG_EXPRESION_MISSING_OPERAND_AFTER_PARENTHESIS:
+                cerr << WRONG_EXPRESION_MISSING_OPERAND_AFTER_PARENTHESIS_MSG <<endl;
+                break;
+            case CONSECUTIVES_OPERATORS_MULTIPLY_DIVIDE:
+                cerr << CONSECUTIVES_OPERATORS_MULTIPLY_DIVIDE_MSG << endl;
+                break;
+            case CONSECUTIVES_OPERATORS_SUM_MINUS_WITHOUT_NUMBER:
+                cerr << CONSECUTIVES_OPERATORS_SUM_MINUS_WITHOUT_NUMBER_MSG << endl;
+                break;
+            case WRONG_MULTIPLY_DIVIDE_PARENTHESIS_COMBINATION:
+                cerr << WRONG_MULTIPLY_DIVIDE_PARENTHESIS_COMBINATION_MSG << endl;
+                break;
+        }   
     } 
 
 

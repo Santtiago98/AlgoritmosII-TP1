@@ -3,24 +3,19 @@
 
 const bignum Standard_multiply::multiply_strat(const bignum& b1, const bignum& b2){
 	
-	//cout << "mult_std:" << b1 <<"*" << b2 <<";" ;
-	
+
 	unsigned short carry = 0;	//carry del producto de cada digito
 	int base = 10;
 	bignum b_0 = 0;
 	bignum b3;
-	
-	if( (b1.digits == NULL) | (b2.digits == NULL) ){
-		
-		// delete[] b3.digits;
-		// b3.digits = NULL;
-		// b3.bn_length = 0;
-		// b3.negative = false;
+	b3.strategy_ptr = b1.strategy_ptr;
+    
+	if( (b1.digits == NULL) || (b2.digits == NULL) ){
 		return b3;
 		
 	}
 	
-	if( (b1==b_0) | (b2==b_0) ){
+	if( (b1==b_0) || (b2==b_0) ){
 		
 		return b_0;
 		
@@ -78,7 +73,7 @@ const bignum Standard_multiply::multiply_strat(const bignum& b1, const bignum& b
 		
 	}
 	
-	if( ( b1.negative & !b2.negative) | (!b1.negative & b2.negative) ){
+	if( ( b1.negative && !b2.negative) || (!b1.negative && b2.negative) ){
 		
 		b3.negative = true;
 		

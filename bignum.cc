@@ -13,7 +13,7 @@ using namespace std;
 
 // ------------------ METODOS PRIVADOS USADOS INTERNAMENTE ------------------ //
 
-unsigned long max_size(const bignum& b1, const bignum& b2){
+unsigned long int max_size(const bignum& b1, const bignum& b2){
 	
 	unsigned long eff = b1.bn_length;
 	
@@ -24,13 +24,12 @@ unsigned long max_size(const bignum& b1, const bignum& b2){
 	
 }
 
-unsigned long min_size(const bignum& b1, const bignum& b2){
+unsigned long int min_size(const bignum& b1, const bignum& b2){
 	
-	unsigned long eff = b1.bn_length;
+	unsigned long int eff = b1.bn_length;
 	
-	if ( b2.bn_length < eff ){
+	if (b2.bn_length < eff){
 		eff = b2.bn_length;
-		
 	}
 	
 	return eff;
@@ -219,7 +218,8 @@ bignum::bignum(const char * c_arr,  Strategy * str_ptr){
 bignum::bignum(bignum const &b){
 	
 	// CONSTRUCTOR COPIA //
-	
+	strategy_ptr = b.strategy_ptr;
+    
 	if( b.digits == NULL ){
 		digits = NULL;
 		bn_length = 0;
@@ -227,8 +227,6 @@ bignum::bignum(bignum const &b){
 		return;
 		
 	}
-    
-    strategy_ptr = b.strategy_ptr;
     
 	bn_length = b.bn_length;
 	negative = b.negative;
@@ -654,7 +652,8 @@ const bignum operator/(const bignum& b1_, const bignum& b2_){
 // ------------------ ASIGNACIONES ------------------ //
 
 const bignum & bignum::operator=(const bignum &b){
-	
+	strategy_ptr = b.strategy_ptr;
+    
 	if( this == &b ){
 		return *this;
 	}
@@ -671,7 +670,7 @@ const bignum & bignum::operator=(const bignum &b){
 	}
     
 
-	strategy_ptr = b.strategy_ptr;
+	
 
 	digits = new unsigned short[b.bn_length];
 	bn_length = b.bn_length;
