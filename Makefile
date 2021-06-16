@@ -33,4 +33,3 @@ karatsuba.o: karatsuba.h bignum.h strategy.h
 clean: 
 	rm *.o
 
-

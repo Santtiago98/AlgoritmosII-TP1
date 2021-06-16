@@ -191,7 +191,7 @@ const bignum Karatsuba_multiply::multiply_strat(const bignum& a_, const bignum& 
 	bignum result;
 	bignum zero = 0;
     
-	std::cout << "Se usa karatsuba!" << std::endl;
+	//std::cout << "Se usa karatsuba!" << std::endl;
     
 	if( (a_.digits == NULL) | (b_.digits == NULL) ){
 		
