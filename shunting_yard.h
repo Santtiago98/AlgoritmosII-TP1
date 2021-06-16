@@ -32,7 +32,7 @@
 
 
 
-Stack<Token<bignum>> shunting_yard(vector<Token<bignum>> ); 
+Stack<Token<bignum>> shunting_yard(std::vector<Token<bignum>> ); 
 bignum calculate(Stack<Token<bignum>> *);
 
 

@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+#include "strategy.h"
+
 #ifndef LEFT_PARENTHESIS
 #define LEFT_PARENTHESIS '('
 #endif
@@ -20,6 +22,7 @@
 #ifndef DEFAULT_SIZE
 #define DEFAULT_SIZE  10
 #endif
+
 
 //using namespace std;
 
@@ -41,8 +44,8 @@ class Token{
         
         // CONSTRUCTORES
         Token();
-        Token(string);
-        Token(T);
+        Token(std::string, Strategy *);
+        Token(T); // constructor copia
         // DESTRUCTOR
         ~Token();
         // GETTERS
@@ -116,7 +119,7 @@ Token<T>::Token(){
     _isbinary = false;
     _precedence = 0;
     _symbol = '\0';
-    data = T(1250);
+    //data = T();
 }
 
 template <class T>
@@ -131,12 +134,12 @@ Token<T>::Token(const T token_){
 }
 
 template <class T>
-Token<T>::Token(const string str){
+Token<T>::Token(const std::string str, Strategy * str_ptr){
     
     // el string debe estar limpio
     size_t aux;
     aux = str.find_first_of("*/+-()"/*simbols.operators+simbols.parenthesis*/);
-    if (aux != string::npos && aux +1 == str.length() ) {
+    if (aux != std::string::npos && aux +1 == str.length() ) {
         //  se encontro algun símbolo y no hay numeros
         switch(str[aux]){
             case '*':
@@ -164,7 +167,7 @@ Token<T>::Token(const string str){
         }
         _isnumber = false;
         _symbol = str[aux];
-        //data = T(str,999);   // chequear como asignar esto para que no se fugue memoria ni se haga referencia a algo que muere
+        //data = T(str);   // chequear como asignar esto para que no se fugue memoria ni se haga referencia a algo que muere
     }
     else {
         // el signo es un '+' o '-' y hay numeros
@@ -174,7 +177,7 @@ Token<T>::Token(const string str){
         _precedence = 0;
         _isbinary = false;
         _symbol = '\0'; // plancho un \0 pues no es utilizado
-        data = T(str, 2000); //llamo al constructor del tipo elegido
+        data = T(str, str_ptr); //llamo al constructor del tipo elegido
         }
 }
 
@@ -238,12 +241,12 @@ class Tokens{
         
         // --- CONSTRUCTORES --- //
         Tokens():length(0){};
-        Tokens(string str);
+        Tokens(std::string str);
 
 };
 
 template <class T>
-Tokens<T>::Tokens(string exp){
+Tokens<T>::Tokens(std::string exp){
     
     if (!exp.length()) {
         std::cout << "Longitud nula" << endl;
@@ -254,32 +257,32 @@ Tokens<T>::Tokens(string exp){
 
 // ---------------------------------------------------------------------------------------
 template <class T> 
-void parseExpression(const string exp, vector<T> &b){
+void parseExpression(const std::string exp, std::vector<T> &b, Strategy * str_ptr){
     // deja el puntero b apuntando a segmento de memoria correspondiente
     // exp es la expresion a parsear en tokens
     T fp;
     
     unsigned long int L = exp.length();
-    string valid_characters = "*/+-()0123456789\t";//simbols_1.operators + simbols_1.digits + simbols_1.parenthesis;
+    std::string valid_characters = "*/+-()0123456789\t";//simbols_1.operators + simbols_1.digits + simbols_1.parenthesis;
     size_t aux,aux2,aux3, iter=0;
     
     // verifico que el string no presente caracteres invalidos
     // los unicos validos son los numeros y operadores y ()
-    if ((aux = exp.find_first_not_of(valid_characters))!= string::npos){
-        std::cout << "Invalid character." << endl;
-        std::cout << exp << "<---" << endl;
+    if ((aux = exp.find_first_not_of(valid_characters))!= std::string::npos){
+        std::cout << "Invalid character." << std::endl;
+        std::cout << exp << "<---" << std::endl;
     }
     
     if (L==0){
-        std::cout << "No expression to parse. Length = 0" << endl;
+        std::cout << "No expression to parse. Length = 0" << std::endl;
     }
     
        
     while (iter < L){
         aux = exp.find_first_of("*/+-()"/*simbols_1.parenthesis + simbols_1.operators*/, iter);
-        if (aux==string::npos){
+        if (aux==std::string::npos){
             // por si los ultimos caracteres son numeros
-            fp = T(exp.substr(iter, L-iter));
+            fp = T(exp.substr(iter, L-iter), str_ptr);
             b.push_back(fp);
             iter = L;
             break;
@@ -288,7 +291,7 @@ void parseExpression(const string exp, vector<T> &b){
             case '*':
             case '/':
                 if (exp[aux+1] == '*' || exp[aux+1] == '/' || exp[0]=='*' || exp[0]=='/'){
-                    std::cout << "Mala expresion2." << endl;
+                    std::cout << "Mala expresion2." << std::endl;
                     exit(1);
                     break;
                 }
@@ -299,28 +302,28 @@ void parseExpression(const string exp, vector<T> &b){
                     // debo verificar que luego haya algun numero 
                     if((aux3 = exp.find_first_of("0123456789", aux2+1)) != aux2+1){
                         // hay 2 caracteres +,- juntos no seguidos por un numero
-                        std::cout << "Mala expresion1." << endl;
+                        std::cout << "Mala expresion1." << std::endl;
                         exit(1);    
                         break;
 
                     }
                     else{//el signo aux2 debe ser parte del numero      
                         if(aux!=iter) { //por si hay nums entre iter y aux
-                        fp = T(exp.substr(iter, aux-iter)); 
+                        fp = T(exp.substr(iter, aux-iter),str_ptr); 
                         b.push_back(fp);
                         }
-                        fp = T(exp.substr(aux, 1)); //creo el operador 
+                        fp = T(exp.substr(aux, 1),str_ptr); //creo el operador 
                         b.push_back(fp);
-                        if ((aux3 = exp.find_first_not_of("0123456789", aux2+1)) != string::npos){
-                        fp = T(exp.substr(aux2, aux3-aux2)); //el numero va de aux2 a aux3
+                        if ((aux3 = exp.find_first_not_of("0123456789", aux2+1)) != std::string::npos){
+                        fp = T(exp.substr(aux2, aux3-aux2),str_ptr); //el numero va de aux2 a aux3
                         b.push_back(fp);
-                        fp = T(exp.substr(aux3,1)); // guardo el simbolo de aux3
+                        fp = T(exp.substr(aux3,1),str_ptr); // guardo el simbolo de aux3
                         b.push_back(fp);
                         iter = aux3+1;
                         break;
                         }
                         else{
-                            fp = T(exp.substr(aux2, L-1-aux2)); //el numero va de aux2 a L
+                            fp = T(exp.substr(aux2, L-1-aux2),str_ptr); //el numero va de aux2 a L
                             b.push_back(fp);
                             iter = L;
                             break;
@@ -332,11 +335,11 @@ void parseExpression(const string exp, vector<T> &b){
                 // genero el token y lo agrego
                 // creo el numero si corresponde, o sea aux > iter
                 if(aux!=iter) {
-                    fp = T(exp.substr(iter, aux-iter)); 
+                    fp = T(exp.substr(iter, aux-iter),str_ptr); 
                     //crear un constructor de TOKEN que reciba char para evitar el substr
                     b.push_back(fp);
                     }               
-                fp = T(exp.substr(aux,1));
+                fp = T(exp.substr(aux,1),str_ptr);
                 b.push_back(fp);   
                 
                 iter = aux+1;
@@ -358,18 +361,19 @@ void parseExpression(const string exp, vector<T> &b){
         }
         // si no hay un numero entonces agrego un 0 al principio para que no quede desbalanceado
         // pues es un parentesis
-        b.insert(b.begin(), T("0"));
+        std::string _cero = "0";
+        b.insert(b.begin(), T(_cero,str_ptr));
     }
     
     // itero todo el vector para corregir errores de parentesis 
-    for (size_t j=1; j < b.size(); j++){
+    for (size_t j=1; j < b.size()-1; j++){ 
         if (b[j].isbracket()){
             if (b[j].getbracket() == LEFT_PARENTHESIS && b[j-1].isnumber()){
-                std::cout << "Mala expresion." << endl;
+                std::cout << "Mala expresion." << std::endl;
                 exit(1);
-            }
+            }    
             if (b[j].getbracket() == RIGHT_PARENTHESIS && b[j+1].isnumber()){
-                std::cout << "Mala expresion." << endl;
+                std::cout << "Mala expresion." << std::endl;
                 exit(1);
             }
         }
@@ -378,7 +382,7 @@ void parseExpression(const string exp, vector<T> &b){
                 case '*':
                 case '/':
                     if (b[j-1].getbracket() == LEFT_PARENTHESIS || b[j+1].getbracket() == RIGHT_PARENTHESIS) {
-                        std::cout << "Mala expresion." << endl;
+                        std::cout << "Mala expresion." << std::endl;
                         exit(1);
                     } 
                     break;
@@ -405,7 +409,7 @@ void parseExpression(const string exp, vector<T> &b){
 
 /*
 int main(){ // script para testear el funcionamiento 
-    string exp;
+    std::string exp;
     
     //Token<bignum> tok1("-69");
     //std::cout << tok1;
