@@ -6,12 +6,15 @@
 #include <string>
 #include <vector>
 
-
 #include "cmdline.h"
+// #include "strategy.h"
 #include "bignum.h"
 #include "token.hpp"
 #include "stack.hpp"
 #include "shunting_yard.h"
+#include "karatsuba.h"
+#include "standard_multiply.h"
+
 
 using namespace std;
 
@@ -192,15 +195,11 @@ void removeSpaces(std::string & str)
         // cout << str << endl;
         // cout << aux << endl;
     }
-    
 }
 
 
-#define ADD '+' 
-#define SUBSTRACT '-'
-#define MULTIPLY '*'
-#define DIVIDE '/'
- 
+
+
 
 int
 main(int argc, char * const argv[])
@@ -213,32 +212,34 @@ main(int argc, char * const argv[])
 	//Hago todos los calculos que haya en iss o me quedo esperando si es cin
     
     bignum result, _auxres;
-    _auxres = bignum('0', 200);
-    string exp="";
-
+    //_auxres = bignum("0");
+    string exp="5*(1*2)";
+    
+    // Strategy * multiplier = new Karatsuba_multiply;
+    Strategy * multiplier = new Standard_multiply;
+    
     try{
         while(1){
         //exp.clear();
-        getline(*iss, exp, '\n');
+        //getline(*iss, exp, '\n');
         //*oss << "\t \t INPUT: " << exp.length() << endl;
         if (!exp.length()){return 0;}
         trim(exp);
         removeSpaces(exp);
-        //*oss << "\t \t Luego del trim : " << exp << endl;
+        // *oss << "\t input luego del trim : " << exp << endl;
         vector<Token<bignum>> bb; //Token<bignum> * bb=NULL;
-        parseExpression(exp, bb);
+        parseExpression(exp, bb, multiplier);
         // for(long unsigned int i=0; i < bb.size() ; i++)
-            // cout << "\t token: " << bb[i]  ;
-
-        Stack<Token<bignum>>  st_out = shunting_yard(bb);
-        result = calculate(&st_out);
-        // if (result.is_negative()){
-            // if (result == _auxres){
-            // cout << "viejo:  " << result << "nuevo:  " << bignum('0') << endl;}
-            
-            // //result = bignum('+0');
+        // {
+            // cout << "\t token: " << bb[i] << endl;
+            // // cout << "is number?  " << bb[i].isnumber() << endl;
         // }
-        cout << result << endl;         
+
+        Stack<Token<bignum>> st_out = shunting_yard(bb);
+        // while(!st_out.empty()){
+            // cout << st_out.pop() << endl;
+        // }
+        cout << calculate(&st_out) << endl;         
         }
     }
     

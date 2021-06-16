@@ -34,7 +34,7 @@ while there are tokens on the operator stack:
 #include "shunting_yard.h"
 
 
-Stack<Token<bignum>> shunting_yard(vector<Token<bignum>> vect_tok)
+Stack<Token<bignum>> shunting_yard(std::vector<Token<bignum>> vect_tok)
 {
     Stack <Token<bignum>>  operator_stack;
     Stack <Token<bignum>>   output_stack ;
@@ -101,7 +101,13 @@ Stack<Token<bignum>> shunting_yard(vector<Token<bignum>> vect_tok)
 
 
 bignum calculate(Stack<Token<bignum>> * stack){
-
+    
+    
+    // if (str_ptr){
+        // b1.set_strategy(str_ptr);
+        // b2.set_strategy(str_ptr);
+    // }
+    
     if(!stack->empty()) {
     	Token <bignum> top_stack;
     	
@@ -109,12 +115,11 @@ bignum calculate(Stack<Token<bignum>> * stack){
         if((top_stack = stack->top()).isnumber())
             return (stack->pop()).getdata();
         
-
         else if( top_stack.isoperator()){
             char op = (stack->pop()).getoperator();
 
             //Llamados recursivos hasta encontrar 2 numeros
-            bignum b1 = calculate(stack);
+            bignum b1 = calculate(stack); // poner acá el seteo
             bignum b2 = calculate(stack);
 
             switch(op){
@@ -125,7 +130,7 @@ bignum calculate(Stack<Token<bignum>> * stack){
                 case MULTIPLY:
                     return b1 * b2;
                 case DIVIDE:
-                    //return b2 / b1;
+                    return b2 / b1;
                     break;
             }
     	}   
@@ -142,7 +147,7 @@ int main()
     try{
         while(1){
         cin >> exp;
-        vector<Token<bignum>> bb; //Token<bignum> * bb=NULL;
+        std::vector<Token<bignum>> bb; //Token<bignum> * bb=NULL;
         parseExpression(exp, bb);
         for(long unsigned int i=0; i < bb.size() ; i++)
             cout << "token:" << bb[i] <<"-" ;
