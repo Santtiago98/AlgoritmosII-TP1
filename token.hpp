@@ -35,10 +35,8 @@
 #define WRONG_MULTIPLY_DIVIDE_PARENTHESIS_COMBINATION 14
 #define WRONG_MULTIPLY_DIVIDE_PARENTHESIS_COMBINATION_MSG "Incorrect order of multiply and divide operators with parenthesis"
 
-
-//using namespace std;
-
-//enum operators {'(', ')', '{', '}', '[', ']', '*', '/', '+', '-'};
+#define NO_INPUT_EXPRESSION 15
+#define NO_INPUT_EXPRESSION_MSG "Input expression to parse is empty"
 
 template <class T>
 class Token{
@@ -147,7 +145,7 @@ Token<T>::Token(const std::string str, Strategy * str_ptr){
     
     // el string debe estar limpio
     size_t aux;
-    aux = str.find_first_of("*/+-()"/*simbols.operators+simbols.parenthesis*/);
+    aux = str.find_first_of("*/+-()");
     if (aux != std::string::npos && aux +1 == str.length() ) {
         //  se encontro algun símbolo y no hay numeros
         switch(str[aux]){
@@ -242,7 +240,7 @@ void parseExpression(const std::string exp, std::vector<T> &b, Strategy * str_pt
     T fp;
     
     unsigned long int L = exp.length();
-    std::string valid_characters = "*/+-()0123456789\t";//simbols_1.operators + simbols_1.digits + simbols_1.parenthesis;
+    std::string valid_characters = "*/+-()0123456789\t";
     size_t aux,aux2,aux3, iter=0;
     
     // verifico que el string no presente caracteres invalidos
@@ -254,11 +252,12 @@ void parseExpression(const std::string exp, std::vector<T> &b, Strategy * str_pt
     
     if (L==0){
         std::cout << "No expression to parse. Length = 0" << std::endl;
+        throw(NO_INPUT_EXPRESSION);
     }
 
     
     while (iter < L){
-        aux = exp.find_first_of("*/+-()"/*simbols_1.parenthesis + simbols_1.operators*/, iter);
+        aux = exp.find_first_of("*/+-()", iter);
         if (aux==std::string::npos){
             // por si los ultimos caracteres son numeros
             fp = T(exp.substr(iter, L-iter), str_ptr);
@@ -310,7 +309,6 @@ void parseExpression(const std::string exp, std::vector<T> &b, Strategy * str_pt
                 }
                 }
             default:
-                //default:
                 // genero el token y lo agrego
                 // creo el numero si corresponde, o sea aux > iter
                 if(aux!=iter) {

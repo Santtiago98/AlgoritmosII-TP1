@@ -527,7 +527,7 @@ const bignum operator/(const bignum& b1_, const bignum& b2_){
 		
 	}
 	
-	cout << ";r_-1=" << r <<";";
+	// cout << ";r_-1=" << r <<";";
 	
 	for( unsigned long i = 0 ; i < (b1.bn_length - b2.bn_length+ 1) ; i++ ){
 

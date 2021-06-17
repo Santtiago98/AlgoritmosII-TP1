@@ -73,7 +73,6 @@ opt_input(string const &arg)
 	}
 
 	// Verificamos que el stream este OK.
-
 	if (!iss->good()) {
 		cerr << "cannot open "
 		     << arg
@@ -174,7 +173,7 @@ void removeSpaces(std::string & str)
     // To keep track of non-space character count
     int count = 0;
  
-    // Traverse the given string. If current character
+    // Reverse the given string. If current character
     // is not space, then place it at index 'count++'
     for (size_t i = 0; i<str.length(); i++)
         if (str[i] != ' ')
@@ -197,24 +196,22 @@ main(int argc, char * const argv[])
 	cmdl.parse(argc, argv);
 
     // at this point the parser should've quit the program if any argument is wrong or missing
-	//Hago todos los calculos que haya en iss o me quedo esperando si es cin
-    
+   
     string exp="12*34";
 
     try{
         while(getline(*iss, exp, '\n')){
-        //while(1){
 
-        if (!exp.length()){continue;}
-        trim(exp);
-        removeSpaces(exp);
-        
-        vector<Token<bignum>> bb; //Token<bignum> * bb=NULL;
-        parseExpression(exp, bb, mult_algorithm);
-        
-        Stack<Token<bignum>> st_out = shunting_yard(bb);
-        *oss << calculate(&st_out) << endl;         
-        }
+            if (!exp.length()){continue;}
+            trim(exp);
+            removeSpaces(exp);
+            
+            vector<Token<bignum>> tokens; 
+            parseExpression(exp, tokens, mult_algorithm);
+            
+            Stack<Token<bignum>> st_out = shunting_yard(tokens);
+            *oss << calculate(&st_out) << endl;         
+            }
         delete  mult_algorithm; 
     }
     
@@ -248,6 +245,9 @@ main(int argc, char * const argv[])
                 break;
             case WRONG_MULTIPLY_DIVIDE_PARENTHESIS_COMBINATION:
                 cerr << WRONG_MULTIPLY_DIVIDE_PARENTHESIS_COMBINATION_MSG << endl;
+                break;
+            case NO_INPUT_EXPRESSION:
+                cerr << NO_INPUT_EXPRESSION_MSG << endl;
                 break;
         }   
     } 

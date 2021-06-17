@@ -28,7 +28,6 @@ const bignum Standard_multiply::multiply_strat(const bignum& b1, const bignum& b
 	}
 	
 	// El producto b1[1..p] y b2[1..q] tiene largo p+q[-1] dependiendo del carry final
-	
 	for(unsigned long i = 0; i < b2.bn_length ; i++){
 		
 		carry = 0;

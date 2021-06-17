@@ -118,7 +118,7 @@ const bignum Karatsuba_multiply::_bn_mult_kara_base_(const bignum& b1_, const bi
 	b3.strategy_ptr = b1_.strategy_ptr;
 	bignum b1;
 	bignum b2;
-    //std::cout <<";karat_base->b1_="<<b1_<<";b2_="<<b2_;
+
 	if( (b1_.digits == NULL) || (b2_.digits == NULL) ){
 		return b3;
 	}
@@ -128,7 +128,6 @@ const bignum Karatsuba_multiply::_bn_mult_kara_base_(const bignum& b1_, const bi
 	}
 	
 	//Se pone en b1 el de mayor cantidad de digitos, y a b2 el que tiene solo un digito
-	
 	if( b1_.bn_length == 1 ){
 		b2 = b1_;
 		b1 = b2_;
@@ -138,7 +137,6 @@ const bignum Karatsuba_multiply::_bn_mult_kara_base_(const bignum& b1_, const bi
 		b1 = b1_;
 	}
 	else{	
-		//std::cout <<";karat_badlength->b1_="<<b1_<<";b2_="<<b2_;
 		return b3;
 	}
 	
@@ -187,8 +185,7 @@ const bignum Karatsuba_multiply::_bn_mult_kara_base_(const bignum& b1_, const bi
 	
 	delete[] aux_digits;
 	aux_digits = NULL;
-	
-	//std::cout <<";result="<<b3<<";";
+
 	return b3;
 	
 }
@@ -248,9 +245,6 @@ const bignum Karatsuba_multiply::multiply_strat(const bignum& a_, const bignum& 
 		b_1 = bn_first_digits( b , k );
 		z0 = multiply_strat( a_1 , b_1 );
 		z2 = multiply_strat( a_0 , b_0 );
-		// a_0 += a_1;
-		// b_0 += b_1;
-		//z1 = multiply_strat( a_0  , b_0 ) - z2 - z0;
 		
 		z1 = multiply_strat( a_1 + a_0 , b_0 + b_1 ) - z2 - z0;
 		
