@@ -52,6 +52,7 @@ class bignum{
 		friend unsigned long max_size(const bignum& , const bignum& ); //determina el maximo effective_size entre dos bignums
 		friend unsigned long min_size(const bignum& , const bignum& ); //determina el minimo effective_size entre dos bignums
 		friend const bignum bn_exp_10(unsigned long expo); //crea un bignum que representa 10^exp
+		friend const bignum bn_mult_pow10_(const bignum& , unsigned long n);
 		
 
     public:

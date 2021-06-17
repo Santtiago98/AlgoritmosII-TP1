@@ -487,54 +487,76 @@ const bignum operator/(const bignum& b1_, const bignum& b2_){
 	
 	int base_int = 10;
 	bignum base = base_int;
-	bignum b1(b1_);
+	bignum b1=b1_;
 	b1.negative = false;
-	bignum b2(b2_);
+	bignum b2=b2_;
 	b2.negative = false;
+	
+	bignum zero = 0;
+	zero.strategy_ptr = b1_.strategy_ptr;
+	bignum one = 1;
+	one.strategy_ptr = b1_.strategy_ptr;
 	bignum b3;
-    b3.strategy_ptr = b1_.strategy_ptr;
-	bignum b_0=0;
+	b3.strategy_ptr = b1_.strategy_ptr;
 	
-	if( (b1_.digits == NULL) || (b2_.digits == NULL) || (b2 == b_0) ){
-		
-		delete[] b3.digits;
-		b3.digits = NULL;
-		b3.bn_length = 0;
-		b3.negative = false;
+	if( (b1_.digits == NULL) || (b2_.digits == NULL) ){
 		return b3;
-		
-	}
-	
-	if( b1 == b_0 ){
-		
-		return b1;
-		
 	}
 	
 	if( b2 > b1 ){
+		return zero;
+	}
+	
+	if( b2 == one ){
+		return b1;
+	}
+	
+	//b1 > b2
+	
+	bignum q = 0;
+	bignum r = 0;
+	bignum d = 0;
+	int beta;
+	bignum m_beta = 0;
+	bignum aux = 0;
+	
+	for( unsigned long i = 0 ; i < (b2.bn_length - 1 ) ; i++ ){
 		
-		b3 = 0;
-		return b3;
+		aux.digits[0] = b1.digits[ b1.bn_length - i - 1 ];
+		r += bn_mult_pow10_( aux , b2.bn_length - i - 2 );
 		
 	}
 	
-	//si se llega aca b1 > b2
+	cout << ";r_-1=" << r <<";";
 	
-	bignum q=0;
-	bignum r=0;
-	
-	r = b1;
-	
-	while( r >= b2 ){
+	for( unsigned long i = 0 ; i < (b1.bn_length - b2.bn_length+ 1) ; i++ ){
+
+		d = bn_mult_pow10_( r , 1 ) + b1.digits[ b1.bn_length - (b2.bn_length - 1) - i - 2 + 1 ];
 		
-		r -= b2;
-		q += 1;
+		
+		for(beta = 0; beta < base_int ; beta++){
+			
+			m_beta = b2;
+			m_beta *= beta;
+
+			if( ( m_beta <= d ) && ( m_beta > (d-b2) ) ){
+				break;
+			}
+			
+		}
+
+		r = d - m_beta;
+
+		q = bn_mult_pow10_(q,1);
+		q += beta;
+
 		
 	}
-	
+
 	b3 = q;
+	b3.strategy_ptr = b1_.strategy_ptr;
 	
-	if( ( b1_.negative && !b2_.negative) || (!b1_.negative && b2_.negative) ){
+	if( ( b1_.negative & !b2_.negative) || (!b1_.negative & b2_.negative) ){
 	
 		b3.negative = true;
 		
@@ -796,115 +818,6 @@ std::ostream& operator<<(std::ostream& os, const bignum& b){
 	return os;
 }
 
-/*
-std::istream& operator>>(std::istream& is, bignum& b){
-	// A DESARROLLAR JUNTO AL RETURN
-	
-	if( b.digits != NULL ){
-		
-		delete [] b.digits;
-		b.digits = NULL;
-		b.bn_length = 0;
-		b.negative = false;
-		
-	}
-	
-	string s;
-	char c;
-	
-	is >> c ;
-	
-	if( c == '-' ){
-		
-		b.negative = true;
-		
-	}
-	else if( c == '+' ){
-		
-		b.negative = false;
-		
-	}
-	else{
-		
-		b.bn_length = 1;
-		b.digits = new unsigned short[b.bn_length];
-		b.digits[0] =  c-48 ;
-		b.negative = false;
-		
-	}
-	
-	if( b.digits == NULL ){
-	
-		is >> c;
-	
-		if( ( c < '0' ) | ( c > '9' )  ){
-			
-			b.digits = NULL;
-			b.bn_length = 0;
-			b.negative = false;
-			return is;
-			
-		}
-		else{
-			
-			b.bn_length = 1;
-			b.digits = new unsigned short[b.bn_length];
-			b.digits[0] =  c-48;
-			
-		}
-	}
-	while( 1 ){
-		
-		is >> c;
-	
-		if( ( c < '0' ) | ( c > '9' )  ){
-		
-			// if( b.digits != NULL ){
-			
-				// delete [] b.digits;
-			
-			// }
-			// b.digits = NULL;
-			// b.bn_length = 0;
-			// b.negative = false;
-			break;
-			
-		}
-		else{
-			
-			b.bn_length++;
-			b.digits = (unsigned short*) realloc( b.digits,b.bn_length*sizeof(unsigned short) ) ;
-			b.digits[b.bn_length-1] = c-48; //restandole 48 queda el digito que necesito como ushort
-			if ( b.digits == NULL ){
-				
-				b.bn_length = 0;
-				b.negative = false;
-				return is;
-				
-			}
-			
-		}
-	}
-	
-	// bignum b1(s);
-	
-	// if( b1.digits == NULL ){
-		
-		// delete [] b.digits;
-		// b.digits = NULL;
-		// b.bn_length = 0;
-		// b.negative = false;
-		// return is;
-		
-	// }
-	
-	// b = b1;
-	
-	return is;
-	
-}
-*/
-
 std::istream& operator>>(std::istream& is, bignum& b){
 	
 	if( b.digits != NULL ){
@@ -964,4 +877,39 @@ void bignum::set_strategy( Strategy *str_ptr){
     }
     this->strategy_ptr = str_ptr;
     
+}
+
+const bignum bn_mult_pow10_(const bignum & b1, unsigned long n){
+	
+	bignum b;
+	bignum zero = 0;
+	b.strategy_ptr = b1.strategy_ptr;
+    
+	if( b1.digits == NULL ){
+        return b;
+	}
+	
+	if( b1 == zero ){
+		return b1;
+	}
+	
+	if( n==0 ){
+		return b1;
+	}	
+	
+	b.bn_length = b1.bn_length + n; // se le agregan n 0s atras
+	b.digits = new unsigned short[b.bn_length];
+	b.negative = b1.negative;
+	
+	for( unsigned long int i=0 ; i < n ; i++ ){
+		b.digits[i] = 0;
+	}
+	
+	for( unsigned long int i=0 ; i < b1.bn_length ; i++ ){
+		b.digits[n + i] = b1.digits[i];
+	}
+	
+	
+	return b;
+	
 }

@@ -136,13 +136,13 @@ opt_help(string const &arg)
 	     << endl;
 	cout << "cmdline options: "
 		 << endl
-		 << "[-m --multiplier] define the algorithm to multiply, default is " << KARATSUBA_MULTIPLIER 
+		 << "[-m --multiplier] define the algorithm to multiply, (options are 'karatsuba' and 'standard'), default is " << KARATSUBA_MULTIPLIER
 		 << endl
 		 << "[-i --input ] define input file, by default stdin"
 		 << endl
 		 << "[-o --output] define output file, by default stdout"
 	     << endl
-		 << "[-h --help] prints a basic help"
+		 << "[-h --help] prints a basic help (this) and exits"
 	     << endl;
 	cout << endl
 	     << "Developed by marto-chiqui-panter"
@@ -199,13 +199,13 @@ main(int argc, char * const argv[])
     // at this point the parser should've quit the program if any argument is wrong or missing
 	//Hago todos los calculos que haya en iss o me quedo esperando si es cin
     
-    string exp="12*-1234";
+    string exp="12*34";
 
     try{
         while(getline(*iss, exp, '\n')){
-        // while(1){
-    
-        if (!exp.length()){return 0;}
+        //while(1){
+
+        if (!exp.length()){continue;}
         trim(exp);
         removeSpaces(exp);
         
