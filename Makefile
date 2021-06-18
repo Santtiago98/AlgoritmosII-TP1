@@ -12,14 +12,14 @@ all: tp1
 tp1: main.o bignum.o cmdline.o shunting_yard.o standard_multiply.o karatsuba.o
 	$(CC) $(CFLAGS) -o tp1 cmdline.o bignum.o shunting_yard.o standard_multiply.o karatsuba.o main.o
 
-main.o: main.cc  bignum.h cmdline.h token.hpp shunting_yard.h strategy.h standard_multiply.h karatsuba.h
-	$(CC) $(CFLAGS) -o main.o -c main.cc 
+main.o: main.cpp  bignum.h cmdline.h token.hpp shunting_yard.h strategy.h standard_multiply.h karatsuba.h
+	$(CC) $(CFLAGS) -o main.o -c main.cpp 
 
 cmdline.o: cmdline.cc cmdline.h
 	$(CC) $(CFLAGS) -o cmdline.o -c cmdline.cc
 
-bignum.o: bignum.cc bignum.h strategy.h
-	$(CC) $(CFLAGS) -o bignum.o -c bignum.cc 
+bignum.o: bignum.cpp bignum.h strategy.h
+	$(CC) $(CFLAGS) -o bignum.o -c bignum.cpp 
 
 shunting_yard.o: shunting_yard.h stack.hpp 
 	$(CC) $(CFLAGS) -o shunting_yard.o -c shunting_yard.cpp
